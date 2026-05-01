@@ -1,0 +1,174 @@
+@startuml DER_PreIFMA
+!theme materia-outline
+
+' Configurações visuais
+skinparam linetype ortho
+skinparam shadowing false
+skinparam class {
+    BackgroundColor White
+    ArrowColor #4f46e5
+    BorderColor #4f46e5
+}
+
+' ══════════════════════════════════════════════
+'  APP: accounts
+' ══════════════════════════════════════════════
+
+entity "User (Usuário)\n<accounts>" as user {
+    * id : INTEGER <<PK>>
+    --
+    * email : VARCHAR(255) <<Unique>>
+    * username : VARCHAR(150) <<Unique>>
+    * name : VARCHAR(120)
+    * xp : INTEGER
+    * streak : INTEGER
+    * last_study_date : DATE
+    * is_active : BOOLEAN
+    * is_staff : BOOLEAN
+    * created_at : DATETIME
+}
+
+' ══════════════════════════════════════════════
+'  APP: exams
+' ══════════════════════════════════════════════
+
+entity "Attachment (Biblioteca)\n<exams>" as attachment {
+    * id : INTEGER <<PK>>
+    --
+    * type : VARCHAR(10) <<text|image>>
+    * content : TEXT
+    * file : VARCHAR(255)
+    * hash : VARCHAR(64) <<Unique>>
+}
+
+entity "Exam (Prova)\n<exams>" as exam {
+    * id : INTEGER <<PK>>
+    --
+    * name : VARCHAR(200)
+    * year : INTEGER
+    * type : VARCHAR(20) <<Choices>>
+}
+
+entity "Question (Questão)\n<exams>" as question {
+    * id : INTEGER <<PK>>
+    --
+    * exam_id : INTEGER <<FK>>
+    * number : INTEGER
+    * subject : VARCHAR(20) <<Choices>>
+    * statement : TEXT
+}
+
+entity "QuestionAttachment (Vínculo)\n<exams>" as qattachment {
+    * id : INTEGER <<PK>>
+    --
+    * question_id : INTEGER <<FK>>
+    * attachment_id : INTEGER <<FK>>
+    * order : INTEGER
+}
+
+entity "Alternative (Alternativa)\n<exams>" as alternative {
+    * id : INTEGER <<PK>>
+    --
+    * question_id : INTEGER <<FK>>
+    * letter : VARCHAR(2)
+    * text : TEXT
+    * is_correct : BOOLEAN
+}
+
+' ══════════════════════════════════════════════
+'  APP: game
+' ══════════════════════════════════════════════
+
+entity "StudySession (Sessão)\n<game>" as session {
+    * id : INTEGER <<PK>>
+    --
+    * user_id : INTEGER <<FK>>
+    * type : VARCHAR(20) <<Choices>>
+    * total_questions : INTEGER
+    * correct_answers : INTEGER
+    * xp_gained : INTEGER
+    * finished : BOOLEAN
+    * created_at : DATETIME
+}
+
+entity "Answer (Resposta)\n<game>" as answer {
+    * id : INTEGER <<PK>>
+    --
+    * user_id : INTEGER <<FK>>
+    * session_id : INTEGER <<FK>>
+    * question_id : INTEGER <<FK>>
+    * selected_letter : VARCHAR(2)
+    * is_correct : BOOLEAN
+    * response_time : INTEGER
+    * created_at : DATETIME
+}
+
+entity "SubjectProgress (Progresso)\n<game>" as progress {
+    * id : INTEGER <<PK>>
+    --
+    * user_id : INTEGER <<FK>>
+    * subject : VARCHAR(20) <<Choices>>
+    * questions_answered : INTEGER
+    * correct_answers : INTEGER
+}
+
+entity "Mission (Missão)\n<game>" as mission {
+    * id : INTEGER <<PK>>
+    --
+    * title : VARCHAR(200)
+    * description : TEXT
+    * xp_reward : INTEGER
+    * goal_type : VARCHAR(50)
+    * goal_value : INTEGER
+}
+
+entity "UserMission (Missão do User)\n<game>" as usermission {
+    * id : INTEGER <<PK>>
+    --
+    * user_id : INTEGER <<FK>>
+    * mission_id : INTEGER <<FK>>
+    * progress : INTEGER
+    * completed : BOOLEAN
+    * date : DATE
+}
+
+entity "Achievement (Conquista)\n<game>" as achievement {
+    * id : INTEGER <<PK>>
+    --
+    * title : VARCHAR(200)
+    * description : TEXT
+    * icon : VARCHAR(255)
+    * xp_reward : INTEGER
+}
+
+entity "UserAchievement (Conquista Liberada)\n<game>" as uachievement {
+    * id : INTEGER <<PK>>
+    --
+    * user_id : INTEGER <<FK>>
+    * achievement_id : INTEGER <<FK>>
+    * unlocked_at : DATETIME
+}
+
+' ══════════════════════════════════════════════
+'  Relacionamentos — exams
+' ══════════════════════════════════════════════
+exam ||--|{ question : "possui"
+question ||--|{ alternative : "contém"
+question ||--|{ qattachment : "vinculada"
+attachment ||--|{ qattachment : "usada em"
+
+' ══════════════════════════════════════════════
+'  Relacionamentos — game
+' ══════════════════════════════════════════════
+user ||--|{ session : "realiza"
+session ||--|{ answer : "contém"
+user ||--|{ answer : "responde"
+question ||--|{ answer : "respondida em"
+
+user ||--|{ progress : "tem"
+user ||--|{ usermission : "cumpre"
+mission ||--|{ usermission : "atribuída"
+user ||--|{ uachievement : "conquista"
+achievement ||--|{ uachievement : "pertence"
+
+@enduml

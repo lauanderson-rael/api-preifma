@@ -1,0 +1,10 @@
+from django.urls import path
+from . import views
+
+app_name = "parser"
+
+urlpatterns = [
+    path("", views.index, name="index"),
+    path("process/", views.process, name="process"),
+    path("save-to-db/", views.save_to_db_view, name="save_to_db"),
+]

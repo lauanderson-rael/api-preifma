@@ -1,0 +1,29 @@
+# ── Ambiente Python ──────────────────────────────────────────────────────────
+venv/
+env/
+.venv/
+*.pyc
+*.pyo
+__pycache__/
+*.egg-info/
+dist/
+build/
+
+# ── Variáveis de ambiente ─────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Django ───────────────────────────────────────────────────────────────────
+*.log
+db.sqlite3
+media/
+staticfiles/
+
+# ── IDEs e SO ────────────────────────────────────────────────────────────────
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+Thumbs.db
