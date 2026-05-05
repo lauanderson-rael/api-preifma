@@ -130,7 +130,7 @@ def process_visual_captures(raw_html: str, pages: list[PageData]) -> str:
 # 2. Funções de Suporte para Ingestão
 # ─────────────────────────────────────────────────────────────────────────────
 
-def _save_image_attachment(src: str) -> Optional[Attachment]:
+def _save_image_attachment(src: str, label: Optional[str] = None) -> Optional[Attachment]:
     """Salva uma imagem base64 na biblioteca e retorna o Attachment."""
     if not src.startswith('data:image/'):
         return None
@@ -140,12 +140,15 @@ def _save_image_attachment(src: str) -> Optional[Attachment]:
     att, _ = Attachment.objects.get_or_create(
         hash=img_hash,
         type='image',
-        defaults={'file': ContentFile(base64.b64decode(imgstr), name=f"img_{img_hash}.{ext}")}
+        defaults={
+            'file': ContentFile(base64.b64decode(imgstr), name=f"img_{img_hash}.{ext}"),
+            'label': label
+        }
     )
     return att
 
 
-def _save_text_attachment(html_content: str) -> Optional[Attachment]:
+def _save_text_attachment(html_content: str, label: Optional[str] = None) -> Optional[Attachment]:
     """Salva texto HTML limpo na biblioteca e retorna o Attachment."""
     text_content = html_content.strip()
     if not text_content:
@@ -154,7 +157,10 @@ def _save_text_attachment(html_content: str) -> Optional[Attachment]:
     att, _ = Attachment.objects.get_or_create(
         hash=text_hash,
         type='text',
-        defaults={'content': text_content}
+        defaults={
+            'content': text_content,
+            'label': label
+        }
     )
     return att
 
@@ -165,15 +171,28 @@ def _process_attachment_item(item_div) -> Optional[Attachment]:
     Retorna EXATAMENTE um Attachment por div (proporção 1:1):
       - Se contém <img> → salva como type='image' (ignora o rótulo de texto).
       - Se é só texto    → salva como type='text'.
+    Separa 'label' (antes do :) e 'content' (depois do :), limpando tags <span>.
     """
+    raw_html = item_div.decode_contents().strip()
+    label = None
+    content = raw_html
+
+    if ":" in raw_html:
+        parts = raw_html.split(":", 1)
+        label = parts[0].strip()
+        content = parts[1].strip()
+        
+    # Limpa tags <span> e </span> do content
+    content = content.replace("<span>", "").replace("</span>", "").strip()
+
     img_tag = item_div.find('img')
 
     if img_tag:
         # Anexo é uma imagem (gráfico, charge, tabela…)
-        return _save_image_attachment(img_tag.get('src', ''))
+        return _save_image_attachment(img_tag.get('src', ''), label=label)
     else:
         # Anexo é texto puro
-        return _save_text_attachment(item_div.decode_contents().strip())
+        return _save_text_attachment(content, label=label)
 
 
 # ─────────────────────────────────────────────────────────────────────────────

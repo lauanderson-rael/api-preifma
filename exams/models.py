@@ -7,6 +7,7 @@ class Attachment(models.Model):
         ('image', 'Imagem'),
     ]
     type = models.CharField(max_length=10, choices=TYPE_CHOICES)
+    label = models.CharField(max_length=100, blank=True, null=True, help_text="Ex: Texto 1, Trecho 2...")
     content = models.TextField(blank=True, null=True, help_text="Usado se for tipo 'text'")
     file = models.ImageField(upload_to='questions/', blank=True, null=True, help_text="Usado se for tipo 'image'")
     hash = models.CharField(max_length=64, unique=True)

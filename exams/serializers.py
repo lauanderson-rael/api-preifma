@@ -5,13 +5,14 @@ from .models import Exam, Question, Alternative, Attachment, QuestionAttachment
 class AttachmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attachment
-        fields = ['id', 'type', 'content', 'file']
+        fields = ['id', 'type', 'label', 'content', 'file']
 
 
 class AttachmentWithOrderSerializer(serializers.Serializer):
     """Includes the `order` field from the through-table."""
     id = serializers.IntegerField(source='attachment.id')
     type = serializers.CharField(source='attachment.type')
+    label = serializers.CharField(source='attachment.label', allow_null=True)
     content = serializers.CharField(source='attachment.content', allow_null=True)
     file = serializers.ImageField(source='attachment.file', allow_null=True)
     order = serializers.IntegerField()
@@ -50,6 +51,7 @@ class QuestionSerializer(serializers.ModelSerializer):
             result.append({
                 'id': att.id,
                 'type': att.type,
+                'label': att.label,
                 'content': att.content,
                 'file': att.file.url if att.file else None,
                 'order': qa.order,
