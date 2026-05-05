@@ -1,5 +1,5 @@
 pip install -r requirements.txt
-export GEMINI_API_KEY="AIzaSyBSy_8yd9ougoOWcW0UTNHzPH8-vsXIbPg"
+export GEMINI_API_KEY="xxxxxxx" 
 python manage.py runserver  
 
 chave gratis
@@ -7,20 +7,9 @@ https://aistudio.google.com/app/apikey
 
 ## projeto 
 Subir o banco: No terminal, rode:
-
-bash
 docker-compose up -d
-Isso vai subir o Postgres em segundo plano.
 
-Rodar o Django localmente: Agora você pode rodar o Django normalmente no seu terminal (com seu venv ativo):
-
-bash
-python manage.py makemigrations game
-python manage.py migrate
-python manage.py runserver
-
-python manage.py createsuperuser
-
+ 
 ## SuperUser
 Email: lauanderson38@gmail.com  
 Username: lauanderson
@@ -52,9 +41,6 @@ exit()
 
 
 ## comands
-python3 manage.py shell
-exit()
-
 python3 manage.py runserver [IP_ADDRESS]
 
 ## banco de dados

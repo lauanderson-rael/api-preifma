@@ -1,0 +1,84 @@
+from rest_framework import serializers
+from .models import Exam, Question, Alternative, Attachment, QuestionAttachment
+
+
+class AttachmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Attachment
+        fields = ['id', 'type', 'content', 'file']
+
+
+class AttachmentWithOrderSerializer(serializers.Serializer):
+    """Includes the `order` field from the through-table."""
+    id = serializers.IntegerField(source='attachment.id')
+    type = serializers.CharField(source='attachment.type')
+    content = serializers.CharField(source='attachment.content', allow_null=True)
+    file = serializers.ImageField(source='attachment.file', allow_null=True)
+    order = serializers.IntegerField()
+
+
+class AlternativePublicSerializer(serializers.ModelSerializer):
+    """Alternativas públicas — NÃO expõe is_correct."""
+    class Meta:
+        model = Alternative
+        fields = ['id', 'letter', 'text']
+
+
+class AlternativePrivateSerializer(serializers.ModelSerializer):
+    """Alternativas com gabarito — uso interno."""
+    class Meta:
+        model = Alternative
+        fields = ['id', 'letter', 'text', 'is_correct']
+
+
+class QuestionSerializer(serializers.ModelSerializer):
+    alternatives = serializers.SerializerMethodField()
+    attachments = serializers.SerializerMethodField()
+
+    def get_alternatives(self, obj):
+        return AlternativePublicSerializer(obj.alternatives.all(), many=True).data
+
+    def get_attachments(self, obj):
+        ordered_qs = (
+            obj.questionattachment_set
+            .select_related('attachment')
+            .order_by('order')
+        )
+        result = []
+        for qa in ordered_qs:
+            att = qa.attachment
+            result.append({
+                'id': att.id,
+                'type': att.type,
+                'content': att.content,
+                'file': att.file.url if att.file else None,
+                'order': qa.order,
+            })
+        return result
+
+    class Meta:
+        model = Question
+        fields = ['id', 'number', 'subject', 'statement', 'attachments', 'alternatives']
+
+
+class ExamSerializer(serializers.ModelSerializer):
+    total_questions = serializers.SerializerMethodField()
+
+    def get_total_questions(self, obj):
+        return obj.questions.count()
+
+    class Meta:
+        model = Exam
+        fields = ['id', 'name', 'year', 'type', 'total_questions']
+
+
+class ExamDetailSerializer(serializers.ModelSerializer):
+    questions = QuestionSerializer(many=True, read_only=True)
+    total_questions = serializers.SerializerMethodField()
+
+    def get_total_questions(self, obj):
+        return obj.questions.count()
+
+    class Meta:
+        model = Exam
+        fields = ['id', 'name', 'year', 'type', 'total_questions', 'questions']

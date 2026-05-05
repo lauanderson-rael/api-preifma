@@ -13,7 +13,7 @@ class StudySessionAdmin(admin.ModelAdmin):
 
 @admin.register(Answer)
 class AnswerAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'question', 'selected_letter', 'is_correct', 'response_time')
+    list_display = ('id', 'user', 'question', 'selected_alternative', 'correct_letter', 'is_correct', 'response_time')
     list_filter = ('is_correct', 'created_at')
 
 

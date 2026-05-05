@@ -27,3 +27,4 @@ staticfiles/
 *.swp
 *.swo
 Thumbs.db
+files_project/*
