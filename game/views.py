@@ -267,9 +267,10 @@ class MissionClaimView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
-        from datetime import date
-        today = date.today()
-        um = get_object_or_404(UserMission, mission_id=pk, user=request.user, date=today)
+        user = request.user
+        
+        # Busca o registro da missão diária pelo ID (o frontend envia o ID do UserMission)
+        um = get_object_or_404(UserMission, pk=pk, user=user)
 
         if not um.completed:
             return Response(

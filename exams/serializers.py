@@ -35,6 +35,15 @@ class AlternativePrivateSerializer(serializers.ModelSerializer):
 class QuestionSerializer(serializers.ModelSerializer):
     alternatives = serializers.SerializerMethodField()
     attachments = serializers.SerializerMethodField()
+    exam_name = serializers.SerializerMethodField()
+    exam_id = serializers.IntegerField(source='exam.id', read_only=True)
+
+    def get_exam_name(self, obj):
+        if not obj.exam or not obj.exam.name:
+            return None
+        # Remove variações de " TÉCNICO" e o hífen " -"
+        name = obj.exam.name.replace(" TÉCNICO", "").replace(" TECNICO", "").replace(" -", "")
+        return name
 
     def get_alternatives(self, obj):
         return AlternativePublicSerializer(obj.alternatives.all(), many=True).data
@@ -60,7 +69,11 @@ class QuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Question
-        fields = ['id', 'number', 'subject', 'statement', 'attachments', 'alternatives']
+        fields = [
+            'id', 'number', 'subject', 'statement', 
+            'exam_id', 'exam_name', 
+            'attachments', 'alternatives'
+        ]
 
 
 class ExamSerializer(serializers.ModelSerializer):
