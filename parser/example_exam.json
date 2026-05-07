@@ -1,0 +1,55 @@
+{
+    "metadata": {
+        "exam_title": "SELETIVO TÉCNICO – CURSO TÉCNICO NA FORMA INTEGRADA – 2023 (IFMA)",
+        "year": 2023,
+        "type": "INTEGRADO"
+    },
+    "global_attachments": [
+        {
+            "id": "Texto-1",
+            "label": "Texto 1",
+            "type": "text",
+            "content": "Não nos matem. Mulheres negras são as principais vítimas..."
+        },
+        {
+            "id": "Texto-2",
+            "label": "Texto 2",
+            "type": "image",
+            "image_data": "data:image/jpeg;base64,/9j/4AAQSkZJRg..."
+        }
+    ],
+    "questions": [
+        {
+            "number": 1,
+            "subject": "portugues",
+            "text": "De acordo com o Texto 1, a violência de gênero no Distrito Federal:",
+            "local_attachments": [
+                "Texto 1",
+                "Texto 2"
+            ],
+            "alternatives": [
+                {
+                    "letter": "A",
+                    "text": "afeta todas as mulheres de forma idêntica."
+                },
+                {
+                    "letter": "B",
+                    "text": "apresenta dados que desmentem a desumanização histórica."
+                },
+                {
+                    "letter": "C",
+                    "text": "incide prioritariamente sobre o segmento das mulheres negras."
+                },
+                {
+                    "letter": "D",
+                    "text": "é combatida de forma eficaz pela Secretaria de Estado da Mulher."
+                },
+                {
+                    "letter": "E",
+                    "text": "diminuiu significativamente no primeiro trimestre de 2021."
+                }
+            ],
+            "correct_answer": "C"
+        }
+    ]
+}

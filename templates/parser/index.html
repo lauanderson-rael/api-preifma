@@ -1,12 +1,20 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>IFMA Parser Pro</title>
   <style>
     /* ── Reset & Base ──────────────────────────────────────────────────── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: #f8fafc;
@@ -18,540 +26,941 @@
     header {
       background: white;
       border-bottom: 1px solid #e2e8f0;
-      position: sticky; top: 0; z-index: 10;
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
+
     .header-inner {
-      max-width: 960px; margin: 0 auto;
+      max-width: 960px;
+      margin: 0 auto;
       padding: 14px 20px;
-      display: flex; align-items: center; justify-content: space-between;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
-    .logo { display: flex; align-items: center; gap: 10px; }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
     .logo-icon {
-      background: #4f46e5; color: white;
-      width: 36px; height: 36px; border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
+      background: #4f46e5;
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    .logo-icon svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; }
-    .logo h1 { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em; }
-    .header-actions { display: flex; gap: 8px; }
-    .btn-copy, .btn-download {
-      display: none; /* shown via JS */
-      align-items: center; gap: 6px;
-      padding: 6px 14px; border-radius: 6px;
-      font-size: 0.85rem; font-weight: 600; cursor: pointer;
-      border: none; transition: background 0.15s;
+
+    .logo-icon svg {
+      width: 20px;
+      height: 20px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
     }
+
+    .logo h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-copy,
+    .btn-download {
+      display: none;
+      /* shown via JS */
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: background 0.15s;
+    }
+
     .btn-copy {
-      background: white; border: 1px solid #e2e8f0; color: #334155;
+      background: white;
+      border: 1px solid #e2e8f0;
+      color: #334155;
     }
-    .btn-copy:hover { background: #f1f5f9; }
-    .btn-download { background: #4f46e5; color: white; }
-    .btn-download:hover { background: #4338ca; }
-    .btn-copy svg, .btn-download svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; }
+
+    .btn-copy:hover {
+      background: #f1f5f9;
+    }
+
+    .btn-download {
+      background: #4f46e5;
+      color: white;
+    }
+
+    .btn-download:hover {
+      background: #4338ca;
+    }
+
+    .btn-copy svg,
+    .btn-download svg {
+      width: 15px;
+      height: 15px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+    }
 
     /* ── Main ─────────────────────────────────────────────────────────── */
-    main { max-width: 960px; margin: 0 auto; padding: 48px 20px; }
-    .hero { text-align: center; margin-bottom: 44px; }
-    .hero h2 { font-size: 2rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 12px; }
-    .hero p { color: #64748b; font-size: 1rem; max-width: 480px; margin: 0 auto; }
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 48px 20px;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 44px;
+    }
+
+    .hero h2 {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 12px;
+    }
+
+    .hero p {
+      color: #64748b;
+      font-size: 1rem;
+      max-width: 480px;
+      margin: 0 auto;
+    }
 
     /* ── Upload Grid ──────────────────────────────────────────────────── */
-    section.upload-section { max-width: 680px; margin: 0 auto; }
-    .upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
-    @media (max-width: 600px) { .upload-grid { grid-template-columns: 1fr; } }
-    .upload-label { font-size: 0.8rem; font-weight: 700; color: #475569; display: block; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.04em; }
-    .drop-zone {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      border: 2px dashed #cbd5e1; border-radius: 14px;
-      padding: 28px 16px; background: white; cursor: pointer;
-      transition: border-color 0.2s, background 0.2s;
-      text-align: center; min-height: 120px;
+    section.upload-section {
+      max-width: 680px;
+      margin: 0 auto;
     }
-    .drop-zone:hover { border-color: #818cf8; }
-    .drop-zone.filled { border-color: #34d399; background: #f0fdf4; }
-    .drop-zone svg { width: 26px; height: 26px; fill: none; stroke: #94a3b8; stroke-width: 1.8; margin-bottom: 8px; transition: stroke 0.2s; }
-    .drop-zone.filled svg { stroke: #059669; }
-    .drop-zone span { font-size: 0.85rem; font-weight: 500; color: #64748b; }
-    .drop-zone.filled span { color: #065f46; }
-    .drop-zone input { display: none; }
+
+    .upload-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 600px) {
+      .upload-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .upload-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #475569;
+      display: block;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .drop-zone {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 2px dashed #cbd5e1;
+      border-radius: 14px;
+      padding: 28px 16px;
+      background: white;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      text-align: center;
+      min-height: 120px;
+    }
+
+    .drop-zone:hover {
+      border-color: #818cf8;
+    }
+
+    .drop-zone.filled {
+      border-color: #34d399;
+      background: #f0fdf4;
+    }
+
+    .drop-zone svg {
+      width: 26px;
+      height: 26px;
+      fill: none;
+      stroke: #94a3b8;
+      stroke-width: 1.8;
+      margin-bottom: 8px;
+      transition: stroke 0.2s;
+    }
+
+    .drop-zone.filled svg {
+      stroke: #059669;
+    }
+
+    .drop-zone span {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #64748b;
+    }
+
+    .drop-zone.filled span {
+      color: #065f46;
+    }
+
+    .drop-zone input {
+      display: none;
+    }
 
     /* ── API Key Warning ──────────────────────────────────────────────── */
     .api-warning {
-      background: #fef3c7; border: 1px solid #fde68a;
-      border-radius: 10px; padding: 14px 18px;
-      display: flex; align-items: flex-start; gap: 10px;
-      margin-bottom: 20px; font-size: 0.875rem; color: #92400e;
+      background: #fef3c7;
+      border: 1px solid #fde68a;
+      border-radius: 10px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 20px;
+      font-size: 0.875rem;
+      color: #92400e;
     }
-    .api-warning svg { width: 18px; height: 18px; flex-shrink: 0; fill: none; stroke: #d97706; stroke-width: 2; margin-top: 1px; }
+
+    .api-warning svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      fill: none;
+      stroke: #d97706;
+      stroke-width: 2;
+      margin-top: 1px;
+    }
+
     .api-key-input {
-      width: 100%; margin-top: 8px; padding: 8px 12px;
-      border: 1px solid #fcd34d; border-radius: 6px;
-      font-size: 0.85rem; background: white; color: #1e293b;
+      width: 100%;
+      margin-top: 8px;
+      padding: 8px 12px;
+      border: 1px solid #fcd34d;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      background: white;
+      color: #1e293b;
       font-family: monospace;
     }
 
     /* ── Submit Button ────────────────────────────────────────────────── */
     .btn-submit {
-      width: 100%; padding: 16px;
-      background: #4f46e5; color: white;
-      border: none; border-radius: 12px;
-      font-size: 1rem; font-weight: 700; cursor: pointer;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%;
+      padding: 16px;
+      background: #4f46e5;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
       transition: background 0.2s, opacity 0.2s;
-      box-shadow: 0 4px 14px rgba(79,70,229,0.35);
+      box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
     }
-    .btn-submit:hover:not(:disabled) { background: #4338ca; }
-    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-submit:hover:not(:disabled) {
+      background: #4338ca;
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
 
     /* ── States ───────────────────────────────────────────────────────── */
-    #state-idle { display: block; }
-    #state-loading { display: none; }
-    #state-success { display: none; }
-    #state-error { display: none; }
+    #state-idle {
+      display: block;
+    }
+
+    #state-loading {
+      display: none;
+    }
+
+    #state-success {
+      display: none;
+    }
+
+    #state-error {
+      display: none;
+    }
 
     .loading-card {
-      background: white; border: 1px solid #e2e8f0;
-      border-radius: 20px; padding: 60px 40px; text-align: center;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 60px 40px;
+      text-align: center;
     }
+
     .spinner {
-      width: 52px; height: 52px; border: 4px solid #e0e7ff;
-      border-top-color: #4f46e5; border-radius: 50%;
+      width: 52px;
+      height: 52px;
+      border: 4px solid #e0e7ff;
+      border-top-color: #4f46e5;
+      border-radius: 50%;
       animation: spin 0.8s linear infinite;
       margin: 0 auto 24px;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .loading-card h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 8px; }
-    .loading-card p { color: #94a3b8; }
-    #loading-status { font-weight: 700; color: #4f46e5; }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loading-card h3 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .loading-card p {
+      color: #94a3b8;
+    }
+
+    #loading-status {
+      font-weight: 700;
+      color: #4f46e5;
+    }
 
     .success-banner {
-      background: #ecfdf5; border: 1px solid #a7f3d0;
-      border-radius: 12px; padding: 14px 18px;
-      display: flex; align-items: center; gap: 10px;
-      color: #065f46; font-weight: 500; margin-bottom: 20px;
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      border-radius: 12px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #065f46;
+      font-weight: 500;
+      margin-bottom: 20px;
     }
-    .success-banner svg { width: 20px; height: 20px; fill: none; stroke: #059669; stroke-width: 2; flex-shrink: 0; }
-    .btn-reset { margin-left: auto; font-size: 0.85rem; text-decoration: underline; font-weight: 700; background: none; border: none; cursor: pointer; color: #065f46; }
+
+    .success-banner svg {
+      width: 20px;
+      height: 20px;
+      fill: none;
+      stroke: #059669;
+      stroke-width: 2;
+      flex-shrink: 0;
+    }
+
+    .btn-reset {
+      margin-left: auto;
+      font-size: 0.85rem;
+      text-decoration: underline;
+      font-weight: 700;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #065f46;
+    }
 
     /* Code viewer */
     .code-viewer {
-      background: #0f172a; border-radius: 16px; padding: 16px;
-      margin-bottom: 20px; border: 1px solid #1e293b;
+      background: #0f172a;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 20px;
+      border: 1px solid #1e293b;
     }
+
     .code-scroll {
-      max-height: 280px; overflow: auto; background: rgba(0,0,0,0.4);
-      border: 1px solid rgba(255,255,255,0.05); border-radius: 8px;
-      padding: 14px; white-space: pre-wrap; font-family: monospace;
-      font-size: 0.72rem; color: #a5b4fc; line-height: 1.6;
+      max-height: 280px;
+      overflow: auto;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 14px;
+      white-space: pre-wrap;
+      font-family: monospace;
+      font-size: 0.72rem;
+      color: #a5b4fc;
+      line-height: 1.6;
     }
 
     /* Preview card */
     .preview-card {
-      background: white; border: 1px solid #e2e8f0;
-      border-radius: 16px; padding: 28px;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 28px;
     }
+
     .preview-title {
-      font-size: 0.75rem; font-weight: 700; color: #94a3b8;
-      text-transform: uppercase; letter-spacing: 0.06em;
-      margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #f1f5f9;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #f1f5f9;
     }
 
     /* Error */
     .error-box {
-      background: #fef2f2; border: 1px solid #fecaca;
-      border-radius: 12px; padding: 16px 20px;
-      display: flex; align-items: flex-start; gap: 10px;
-      color: #991b1b; margin-top: 16px;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      color: #991b1b;
+      margin-top: 16px;
     }
-    .error-box svg { width: 18px; height: 18px; fill: none; stroke: #dc2626; stroke-width: 2; flex-shrink: 0; margin-top: 2px; }
+
+    .error-box svg {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: #dc2626;
+      stroke-width: 2;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
 
     /* ── Exam HTML Styles (preview) ───────────────────────────────────── */
     #preview-area .exam-title {
-      text-align: center; font-size: 1.3rem; font-weight: 800;
-      border-bottom: 2px solid #4f46e5; padding-bottom: 14px;
-      margin-bottom: 28px; text-transform: uppercase; color: #1e293b;
+      text-align: center;
+      font-size: 1.3rem;
+      font-weight: 800;
+      border-bottom: 2px solid #4f46e5;
+      padding-bottom: 14px;
+      margin-bottom: 28px;
+      text-transform: uppercase;
+      color: #1e293b;
     }
+
     #preview-area .question-block {
-      margin-bottom: 36px; padding: 20px;
-      background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;
+      margin-bottom: 36px;
+      padding: 20px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
     }
+
     #preview-area .question-meta {
-      font-size: 0.7rem; font-weight: 700; color: #818cf8;
-      text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #818cf8;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
     }
+
     #preview-area .question-number {
-      font-size: 1.05rem; font-weight: 700; color: #4f46e5; margin-bottom: 12px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #4f46e5;
+      margin-bottom: 12px;
     }
+
     #preview-area .question-context {
-      font-style: italic; color: #475569; margin-bottom: 18px;
-      padding-bottom: 18px; border-bottom: 1px solid #e2e8f0;
-      font-size: 0.88rem; line-height: 1.7;
+      font-style: italic;
+      color: #475569;
+      margin-bottom: 18px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 0.88rem;
+      line-height: 1.7;
     }
-    #preview-area .question-statement { font-weight: 500; margin-bottom: 16px; line-height: 1.65; }
-    #preview-area .question-alternatives ul { list-style: none; padding: 0; }
+
+    #preview-area .question-statement {
+      font-weight: 500;
+      margin-bottom: 16px;
+      line-height: 1.65;
+    }
+
+    #preview-area .question-alternatives ul {
+      list-style: none;
+      padding: 0;
+    }
+
     #preview-area .question-alternatives li {
-      padding: 10px 14px; background: white;
-      border: 1px solid #e2e8f0; margin-bottom: 8px; border-radius: 8px;
-      font-size: 0.9rem; line-height: 1.5;
+      padding: 10px 14px;
+      background: white;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 8px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      line-height: 1.5;
     }
+
     #preview-area .correct-answer {
-      margin-top: 18px; padding-top: 14px; border-top: 1px solid #e2e8f0;
-      font-weight: 700; color: #059669;
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px solid #e2e8f0;
+      font-weight: 700;
+      color: #059669;
     }
+
     #preview-area .correct-answer span {
-      background: #d1fae5; padding: 2px 10px; border-radius: 4px;
-      color: #047857; margin-left: 6px;
+      background: #d1fae5;
+      padding: 2px 10px;
+      border-radius: 4px;
+      color: #047857;
+      margin-left: 6px;
     }
+
     #preview-area .exam-capture-img {
-      max-width: 100%; height: auto; display: block;
-      margin: 16px auto; border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 16px auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       border: 1px solid #e2e8f0;
     }
   </style>
 </head>
+
 <body>
-
-<!-- ── HEADER ──────────────────────────────────────────────────────────── -->
-<header>
-  <div class="header-inner">
-    <div class="logo">
-      <div class="logo-icon">
-        <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+  <header>
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+          </svg>
+        </div>
+        <h1>IFMA Parser Pro</h1>
       </div>
-      <h1>IFMA Parser Pro</h1>
+      <div class="header-actions">
+        <button class="btn-copy" id="btn-copy" onclick="copyHtml()">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+          </svg>
+          Copiar JSON
+        </button>
+        <button class="btn-download" id="btn-download" onclick="downloadHtml()">
+          <svg viewBox="0 0 24 24">
+            <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          Baixar JSON
+        </button>
+        <button class="btn-download" id="btn-save-db" onclick="saveToDb()" style="display:none; background: #059669;">
+          <svg viewBox="0 0 24 24">
+            <path d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+          </svg>
+          Salvar no Banco
+        </button>
+      </div>
     </div>
-    <div class="header-actions">
-      <button class="btn-copy" id="btn-copy" onclick="copyHtml()">
-        <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-        Copiar
-      </button>
-      <button class="btn-download" id="btn-download" onclick="downloadHtml()" style="background: #64748b;">
-        <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-        Baixar HTML
-      </button>
-      <button class="btn-download" id="btn-save-db" onclick="saveToDb()" style="display:none; background: #059669;">
-        <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
-        Salvar no Banco
-      </button>
+  </header>
+
+  <!-- ── MAIN ────────────────────────────────────────────────────────────── -->
+  <main>
+    <div class="hero">
+      <h2>Parser de Provas (JSON)</h2>
+      <p>Envie a prova e o gabarito para estruturar os dados em JSON e subir no banco de dados.</p>
     </div>
-  </div>
-</header>
 
-<!-- ── MAIN ────────────────────────────────────────────────────────────── -->
-<main>
-  <div class="hero">
-    <h2>Parser de Provas com Gabarito</h2>
-    <p>Envie a prova e, opcionalmente, o gabarito oficial para estruturar as questões com as respostas corretas vinculadas.</p>
-  </div>
+    <section class="upload-section">
 
-  <section class="upload-section">
+      <!-- STATE: IDLE / ERROR ──────────────────────────────────────────── -->
+      <div id="state-idle">
 
-    <!-- STATE: IDLE / ERROR ──────────────────────────────────────────── -->
-    <div id="state-idle">
+        {% if not has_api_key %}
+        <div class="api-warning">
+          <svg viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <div>
+            <strong>GEMINI_API_KEY não detectada no servidor.</strong><br />
+            Cole sua chave abaixo para esta sessão:
+            <input type="password" class="api-key-input" id="api-key-input" placeholder="AIza..." autocomplete="off" />
+          </div>
+        </div>
+        {% endif %}
 
-      {% if not has_api_key %}
-      <div class="api-warning">
-        <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-        <div>
-          <strong>GEMINI_API_KEY não detectada no servidor.</strong><br/>
-          Cole sua chave abaixo para esta sessão (ela será enviada ao backend):
-          <input type="password" class="api-key-input" id="api-key-input"
-                 placeholder="AIza..." autocomplete="off" />
+        <div class="upload-grid" style="grid-template-columns: 1fr; margin-bottom: 24px;">
+          <div>
+            <label class="upload-label">Opção A: Subir Prova Estruturada (.ZIP com JSON + Imagens)</label>
+            <label class="drop-zone" id="zone-zip" for="input-zip" style="border-color: #4f46e5; background: #f5f3ff;">
+              <svg viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path>
+                <line x1="16" y1="8" x2="2" y2="22"></line>
+                <line x1="17.5" y1="15" x2="9" y2="15"></line>
+              </svg>
+              <span id="label-zip">Selecionar arquivo .ZIP</span>
+              <input type="file" id="input-zip" accept=".zip" onchange="onZipFileChange(this)" />
+            </label>
+          </div>
+        </div>
+
+
+        <label class="upload-label">Opção B: PARSER PROVA COM IA, E EXPORTAR PARA JSON OU BANCO DE DADOS</label>
+        <div class="upload-grid">
+          <div>
+
+            <label class="drop-zone" id="zone-exam" for="input-exam" style="margin-bottom: 5px;">
+              <svg viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+              </svg>
+              <span id="label-exam">Selecionar Prova</span>
+              <input type="file" id="input-exam" accept=".pdf" onchange="onFileChange('exam', this)" />
+            </label>
+
+            <label class="upload-label" style="color: #8994a3; text-transform: capitalize;">1. Arquivo da
+              Prova(PDF)</label>
+          </div>
+          <div>
+
+            <label class="drop-zone" style="margin-bottom: 5px;" id="zone-key" for="input-key">
+              <svg viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <span id="label-key">Selecionar Gabarito</span>
+              <input type="file" id="input-key" accept=".pdf" onchange="onFileChange('key', this)" />
+            </label>
+            <label class="upload-label" style="color: #8994a3; text-transform: capitalize;">2. Gabarito (Opcional
+              PDF)</label>
+          </div>
+        </div>
+
+        <button class="btn-submit" id="btn-submit" onclick="handleProcess()" disabled>
+          Começar Estruturação
+        </button>
+
+        <div id="state-error" class="error-box">
+          <svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+          <span id="error-msg"></span>
         </div>
       </div>
-      {% endif %}
 
-      <div class="upload-grid">
-        <div>
-          <label class="upload-label">1. Arquivo da Prova</label>
-          <label class="drop-zone" id="zone-exam" for="input-exam">
-            <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-            <span id="label-exam">Selecionar Prova</span>
-            <input type="file" id="input-exam" accept=".pdf" onchange="onFileChange('exam', this)" />
-          </label>
-        </div>
-        <div>
-          <label class="upload-label">2. Gabarito (Opcional)</label>
-          <label class="drop-zone" id="zone-key" for="input-key">
-            <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-            <span id="label-key">Selecionar Gabarito</span>
-            <input type="file" id="input-key" accept=".pdf" onchange="onFileChange('key', this)" />
-          </label>
+      <!-- STATE: LOADING ───────────────────────────────────────────────── -->
+      <div id="state-loading">
+        <div class="loading-card">
+          <div class="spinner"></div>
+          <h3><span id="loading-status">Lendo arquivos...</span></h3>
+          <p>Isso pode levar alguns minutos. Estamos convertendo para JSON.</p>
         </div>
       </div>
 
-      <div style="margin-bottom: 24px;">
-        <div style="display: block; width: 100%;">
-          <label class="upload-label">Subir HTML já estruturado (Para o Banco)</label>
-          <label class="drop-zone" id="zone-html" for="input-html" style="border-style: solid; border-width: 1px; background: #fdf2f2; border-color: #fca5a5;">
-            <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
-            <span id="label-html">Selecionar arquivo .html</span>
-            <input type="file" id="input-html" accept=".html" onchange="onHtmlFileChange(this)" />
-          </label>
+      <!-- STATE: SUCCESS ───────────────────────────────────────────────── -->
+      <div id="state-success">
+        <div class="success-banner">
+          <svg viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>Estrutura JSON gerada com sucesso!</span>
+          <button class="btn-reset" onclick="resetState()">Novo PDF</button>
+        </div>
+
+        <div class="code-viewer">
+          <div class="code-scroll" id="code-output"></div>
+        </div>
+
+        <div class="preview-card">
+          <div class="preview-title">📄 Preview da Prova (Gerado do JSON)</div>
+          <div id="preview-area"></div>
         </div>
       </div>
 
-      <button class="btn-submit" id="btn-submit" onclick="handleProcess()" disabled>
-        Começar Estruturação
-      </button>
+      <div id="db-status-area" style="margin-top: 20px;"></div>
 
-      <div id="state-error" class="error-box">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        <span id="error-msg"></span>
-      </div>
-    </div>
+    </section>
+  </main>
 
-    <!-- STATE: LOADING ───────────────────────────────────────────────── -->
-    <div id="state-loading">
-      <div class="loading-card">
-        <div class="spinner"></div>
-        <h3><span id="loading-status">Lendo arquivos...</span></h3>
-        <p>Isso pode levar alguns segundos dependendo do tamanho da prova.</p>
-      </div>
-    </div>
+  <script>
+    // ── Estado ─────────────────────────────────────────────────────────────
+    let examFile = null;
+    let keyFile = null;
+    let examData = null;
+    let examFileName = '';
 
-    <!-- STATE: SUCCESS ───────────────────────────────────────────────── -->
-    <div id="state-success">
-      <div class="success-banner">
-        <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-        <span>Tudo pronto! HTML gerado com gabarito embutido.</span>
-        <button class="btn-reset" onclick="resetState()">Novo PDF</button>
-      </div>
-
-      <div class="code-viewer">
-        <div class="code-scroll" id="code-output"></div>
-      </div>
-
-      <div class="preview-card">
-        <div class="preview-title">📄 Preview da Prova Estruturada</div>
-        <div id="preview-area"></div>
-      </div>
-    </div>
-
-    <div id="db-status-area" style="margin-top: 20px;"></div>
-
-  </section>
-</main>
-
-<script>
-  // ── Estado ─────────────────────────────────────────────────────────────
-  let examFile = null;
-  let keyFile  = null;
-  let resultHtml = '';
-  let examFileName = '';
-
-  // ── Seleção de arquivos ─────────────────────────────────────────────────
-  function onFileChange(which, input) {
-    const file = input.files[0] || null;
-    if (which === 'exam') {
-      examFile = file;
-      const zone = document.getElementById('zone-exam');
-      const lbl  = document.getElementById('label-exam');
-      if (file) { zone.classList.add('filled'); lbl.textContent = file.name; examFileName = file.name; }
-      else       { zone.classList.remove('filled'); lbl.textContent = 'Selecionar Prova'; }
-    } else {
-      keyFile = file;
-      const zone = document.getElementById('zone-key');
-      const lbl  = document.getElementById('label-key');
-      if (file) { zone.classList.add('filled'); lbl.textContent = file.name; }
-      else       { zone.classList.remove('filled'); lbl.textContent = 'Selecionar Gabarito'; }
-    }
-    document.getElementById('btn-submit').disabled = !examFile;
-  }
-
-  // ── Seleção de arquivo HTML ──────────────────────────────────────────────
-  function onHtmlFileChange(input) {
-    const file = input.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const content = e.target.result;
-      if (confirm(`Deseja subir o arquivo "${file.name}" diretamente para o banco de dados?`)) {
-        resultHtml = content;
-        await saveToDb();
+    // ── Seleção de arquivos ─────────────────────────────────────────────────
+    function onFileChange(which, input) {
+      const file = input.files[0] || null;
+      if (which === 'exam') {
+        examFile = file;
+        const zone = document.getElementById('zone-exam');
+        const lbl = document.getElementById('label-exam');
+        if (file) { zone.classList.add('filled'); lbl.textContent = file.name; examFileName = file.name; }
+        else { zone.classList.remove('filled'); lbl.textContent = 'Selecionar Prova'; }
+      } else {
+        keyFile = file;
+        const zone = document.getElementById('zone-key');
+        const lbl = document.getElementById('label-key');
+        if (file) { zone.classList.add('filled'); lbl.textContent = file.name; }
+        else { zone.classList.remove('filled'); lbl.textContent = 'Selecionar Gabarito'; }
       }
-    };
-    reader.readAsText(file);
-  }
-
-  // ── Processar ───────────────────────────────────────────────────────────
-  async function handleProcess() {
-    if (!examFile) return;
-    showState('loading');
-    document.getElementById('loading-status').textContent = 'Enviando para o servidor...';
-
-    const form = new FormData();
-    form.append('exam_pdf', examFile);
-    if (keyFile) form.append('answer_key_pdf', keyFile);
-
-    // Chave via UI (quando não está no servidor)
-    const keyInput = document.getElementById('api-key-input');
-    if (keyInput && keyInput.value.trim()) {
-      form.append('api_key_override', keyInput.value.trim());
+      document.getElementById('btn-submit').disabled = !examFile;
     }
 
-    try {
-      document.getElementById('loading-status').textContent = 'Cruzando questões com gabarito via IA...';
-      const resp = await fetch('/process/', { method: 'POST', body: form });
-      const data = await resp.json();
+    // ── Seleção de arquivo ZIP ──────────────────────────────────────────────
+    async function onZipFileChange(input) {
+      const file = input.files[0];
+      if (!file) return;
 
-      if (!resp.ok || data.error) throw new Error(data.error || 'Erro desconhecido.');
+      if (!confirm(`Deseja subir o arquivo ZIP "${file.name}" para o banco de dados?`)) {
+        input.value = '';
+        return;
+      }
 
-      resultHtml = data.html;
-      document.getElementById('code-output').textContent = resultHtml;
-      document.getElementById('preview-area').innerHTML  = resultHtml;
+      showState('loading');
+      document.getElementById('loading-status').textContent = 'Enviando e processando ZIP...';
 
-      showState('success');
-      document.getElementById('btn-copy').style.display     = 'flex';
-      document.getElementById('btn-download').style.display = 'flex';
-      document.getElementById('btn-save-db').style.display  = 'flex';
-    } catch (err) {
-      showError(err.message);
+      const form = new FormData();
+      form.append('zip_file', file);
+
+      try {
+        const resp = await fetch('/ingest-zip/', { method: 'POST', body: form });
+        const data = await resp.json();
+
+        if (!resp.ok || data.error) throw new Error(data.error || 'Erro ao processar ZIP.');
+
+        // Exibe preview do que foi salvo
+        examData = data;
+        document.getElementById('code-output').textContent = JSON.stringify(examData, null, 2);
+        renderExam(examData);
+        showState('success');
+
+        const statusArea = document.getElementById('db-status-area');
+        statusArea.innerHTML = `
+        <div class="success-banner">
+          <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+          <span>ZIP Ingerido: ${data.saved} questões salvas!</span>
+        </div>
+      `;
+      } catch (err) {
+        showError(err.message);
+      }
     }
-  }
 
-  // ── Salvar no Banco ─────────────────────────────────────────────────────
-  async function saveToDb() {
-    const btn = document.getElementById('btn-save-db');
-    const statusArea = document.getElementById('db-status-area');
-    const anoInput = document.getElementById('input-ano');
-    const ano = anoInput ? anoInput.value : 2025;
-    
-    btn.disabled = true;
-    btn.textContent = 'Salvando...';
-    statusArea.innerHTML = '<div class="success-banner" style="background: #f0f9ff; border-color: #bae6fd; color: #0369a1;">Processando e salvando questões no banco de dados...</div>';
+    // ── Seleção de arquivo JSON ──────────────────────────────────────────────
+    function onJsonFileChange(input) {
+      const file = input.files[0];
+      if (!file) return;
 
-    try {
-      const resp = await fetch('/save-to-db/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ html: resultHtml, ano: ano })
-      });
-      const data = await resp.json();
-
-      // Caso o servidor não encontre o ano e peça para o usuário digitar
-      if (resp.status === 400 && data.error && data.error.includes("ano")) {
-        const novoAno = prompt("Não consegui identificar o ano no HTML. Por favor, digite o ano da prova (ex: 2025):");
-        if (novoAno) {
-          // Tenta salvar de novo com o ano digitado
-          btn.textContent = 'Tentando de novo...';
-          const retryResp = await fetch('/save-to-db/', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ html: resultHtml, ano: novoAno })
-          });
-          const retryData = await retryResp.json();
-          if (!retryResp.ok) throw new Error(retryData.error || 'Erro ao salvar.');
-          
-          exibirSucesso(retryData);
-          return;
-        } else {
-          throw new Error("O ano é obrigatório para salvar no banco.");
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const content = JSON.parse(e.target.result);
+          if (confirm(`Deseja subir o arquivo JSON "${file.name}" diretamente para o banco de dados?`)) {
+            examData = content;
+            await saveToDb();
+          }
+        } catch (err) {
+          alert("Erro ao ler JSON: " + err.message);
         }
+      };
+      reader.readAsText(file);
+    }
+
+    // ── Processar ───────────────────────────────────────────────────────────
+    async function handleProcess() {
+      if (!examFile) return;
+      showState('loading');
+      document.getElementById('loading-status').textContent = 'Enviando para o servidor...';
+
+      const form = new FormData();
+      form.append('exam_pdf', examFile);
+      if (keyFile) form.append('answer_key_pdf', keyFile);
+
+      const keyInput = document.getElementById('api-key-input');
+      if (keyInput && keyInput.value.trim()) {
+        form.append('api_key_override', keyInput.value.trim());
       }
 
-      if (!resp.ok || data.error) throw new Error(data.error || 'Erro ao salvar.');
+      try {
+        document.getElementById('loading-status').textContent = 'Processando JSON via IA...';
+        const resp = await fetch('/process/', { method: 'POST', body: form });
+        const data = await resp.json();
 
-      exibirSucesso(data);
-    } catch (err) {
-      statusArea.innerHTML = `<div class="error-box">${err.message}</div>`;
-      btn.disabled = false;
-      btn.textContent = 'Tentar Novamente';
+        if (!resp.ok || data.error) throw new Error(data.error || 'Erro desconhecido.');
+
+        examData = data;
+        document.getElementById('code-output').textContent = JSON.stringify(examData, null, 2);
+
+        renderExam(examData);
+
+        showState('success');
+        document.getElementById('btn-copy').style.display = 'flex';
+        document.getElementById('btn-download').style.display = 'flex';
+        document.getElementById('btn-save-db').style.display = 'flex';
+      } catch (err) {
+        showError(err.message);
+      }
     }
-  }
 
-  function exibirSucesso(data) {
-    const btn = document.getElementById('btn-save-db');
-    const statusArea = document.getElementById('db-status-area');
-    statusArea.innerHTML = `
+    // ── Renderizar Prova no Preview ─────────────────────────────────────────
+    function renderExam(data) {
+      const container = document.getElementById('preview-area');
+      let html = '';
+
+      const meta = data.metadata || {};
+      html += `<h1 class="exam-title">${meta.exam_title || 'Sem Título'}</h1>`;
+
+      // Biblioteca de Anexos
+      const attachments = {};
+      (data.global_attachments || []).forEach(att => {
+        attachments[att.id] = att;
+        attachments[att.label] = att;
+      });
+
+      (data.questions || []).forEach(q => {
+        html += `<article class="question-block">
+            <div class="question-meta">${q.subject || ''}</div>
+            <div class="question-number">Questão ${q.number}</div>`;
+
+        // Anexos da questão
+        (q.local_attachments || []).forEach(ref => {
+          const att = attachments[ref];
+          if (att) {
+            if (att.type === 'text') {
+              html += `<div class="question-context">${att.content}</div>`;
+            } else if (att.type === 'image') {
+              html += `<img src="${att.image_data}" class="exam-capture-img" />`;
+            }
+          }
+        });
+
+        html += `<div class="question-statement">${q.text}</div>
+            <div class="question-alternatives"><ul>`;
+
+        (q.alternatives || []).forEach(alt => {
+          const isCorrect = alt.letter === q.correct_answer;
+          html += `<li style="${isCorrect ? 'border-color: #34d399; background: #f0fdf4;' : ''}">
+                <strong>${alt.letter})</strong> ${alt.text}
+            </li>`;
+        });
+
+        html += `</ul></div>
+            <div class="correct-answer">Gabarito: <span>${q.correct_answer}</span></div>
+        </article>`;
+      });
+
+      container.innerHTML = html;
+    }
+
+    // ── Salvar no Banco ─────────────────────────────────────────────────────
+    async function saveToDb() {
+      const btn = document.getElementById('btn-save-db');
+      const statusArea = document.getElementById('db-status-area');
+
+      btn.disabled = true;
+      btn.textContent = 'Salvando...';
+      statusArea.innerHTML = '<div class="success-banner" style="background: #f0f9ff; border-color: #bae6fd; color: #0369a1;">Persistindo dados no Django...</div>';
+
+      try {
+        const resp = await fetch('/save-to-db/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(examData)
+        });
+        const data = await resp.json();
+
+        if (!resp.ok || data.error) throw new Error(data.error || 'Erro ao salvar.');
+
+        exibirSucesso(data);
+      } catch (err) {
+        statusArea.innerHTML = `<div class="error-box">${err.message}</div>`;
+        btn.disabled = false;
+        btn.textContent = 'Tentar Novamente';
+      }
+    }
+
+    function exibirSucesso(data) {
+      const btn = document.getElementById('btn-save-db');
+      const statusArea = document.getElementById('db-status-area');
+      statusArea.innerHTML = `
       <div class="success-banner">
         <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-        <span>${data.saved} questões foram salvas com sucesso!</span>
+        <span>${data.saved} questões salvas! (${data.attachments_in_library} anexos)</span>
       </div>
     `;
-    if (data.errors && data.errors.length > 0) {
-      statusArea.innerHTML += `<div class="error-box">${data.errors.join('<br>')}</div>`;
+      if (data.errors && data.errors.length > 0) {
+        statusArea.innerHTML += `<div class="error-box">${data.errors.join('<br>')}</div>`;
+      }
+      btn.textContent = 'Salvo!';
     }
-    btn.textContent = 'Salvo!';
-  }
 
-  // ── Helpers de UI ───────────────────────────────────────────────────────
-  function showState(state) {
-    ['idle','loading','success','error'].forEach(s => {
-      const el = document.getElementById('state-' + s);
-      if (el) el.style.display = 'none';
-    });
-    const target = document.getElementById('state-' + state);
-    if (target) target.style.display = 'block';
-  }
+    // ── Helpers de UI ───────────────────────────────────────────────────────
+    function showState(state) {
+      ['idle', 'loading', 'success', 'error'].forEach(s => {
+        const el = document.getElementById('state-' + s);
+        if (el) el.style.display = 'none';
+      });
+      const target = document.getElementById('state-' + state);
+      if (target) target.style.display = 'block';
+    }
 
-  function showError(msg) {
-    showState('idle');
-    const box = document.getElementById('state-error');
-    box.style.display = 'flex';
-    document.getElementById('error-msg').textContent = msg;
-  }
+    function showError(msg) {
+      showState('idle');
+      const box = document.getElementById('state-error');
+      box.style.display = 'flex';
+      document.getElementById('error-msg').textContent = msg;
+    }
 
-  function resetState() {
-    examFile = null; keyFile = null; resultHtml = ''; examFileName = '';
-    document.getElementById('input-exam').value = '';
-    document.getElementById('input-key').value  = '';
-    document.getElementById('zone-exam').classList.remove('filled');
-    document.getElementById('zone-key').classList.remove('filled');
-    document.getElementById('label-exam').textContent = 'Selecionar Prova';
-    document.getElementById('label-key').textContent  = 'Selecionar Gabarito';
-    document.getElementById('btn-submit').disabled = true;
-    document.getElementById('btn-copy').style.display     = 'none';
-    document.getElementById('btn-download').style.display = 'none';
-    document.getElementById('state-error').style.display = 'none';
-    showState('idle');
-  }
+    function resetState() {
+      examFile = null; keyFile = null; examData = null; examFileName = '';
+      document.getElementById('input-exam').value = '';
+      document.getElementById('input-key').value = '';
+      document.getElementById('zone-exam').classList.remove('filled');
+      document.getElementById('zone-key').classList.remove('filled');
+      document.getElementById('label-exam').textContent = 'Selecionar Prova';
+      document.getElementById('label-key').textContent = 'Selecionar Gabarito';
+      document.getElementById('btn-submit').disabled = true;
+      document.getElementById('btn-copy').style.display = 'none';
+      document.getElementById('btn-download').style.display = 'none';
+      document.getElementById('state-error').style.display = 'none';
+      showState('idle');
+    }
 
-  // ── Copiar / Baixar ─────────────────────────────────────────────────────
-  function copyHtml() {
-    navigator.clipboard.writeText(resultHtml)
-      .then(() => alert('HTML copiado para a área de transferência!'))
-      .catch(() => alert('Não foi possível copiar automaticamente.'));
-  }
+    // ── Copiar / Baixar ─────────────────────────────────────────────────────
+    function copyHtml() {
+      navigator.clipboard.writeText(JSON.stringify(examData, null, 2))
+        .then(() => alert('JSON copiado!'))
+        .catch(() => alert('Erro ao copiar.'));
+    }
 
-  function downloadHtml() {
-    const fullHtml = `<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <title>Prova IFMA Estruturada</title>
-  <style>
-    body { font-family: sans-serif; max-width: 820px; margin: 40px auto; padding: 20px; color: #334155; }
-    .exam-title { text-align:center; font-size:1.5rem; font-weight:800; border-bottom:2px solid #4f46e5; padding-bottom:14px; margin-bottom:28px; text-transform:uppercase; }
-    .question-block { margin-bottom:36px; padding:20px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; }
-    .question-meta { font-size:0.7rem; font-weight:700; color:#818cf8; text-transform:uppercase; letter-spacing:.08em; margin-bottom:6px; }
-    .question-number { font-size:1.05rem; font-weight:700; color:#4f46e5; margin-bottom:12px; }
-    .question-context { font-style:italic; color:#475569; margin-bottom:18px; padding-bottom:18px; border-bottom:1px solid #e2e8f0; font-size:.88rem; line-height:1.7; }
-    .question-statement { font-weight:500; margin-bottom:16px; line-height:1.65; }
-    .question-alternatives ul { list-style:none; padding:0; }
-    .question-alternatives li { padding:10px 14px; background:white; border:1px solid #e2e8f0; margin-bottom:8px; border-radius:8px; }
-    .correct-answer { margin-top:18px; padding-top:14px; border-top:1px solid #e2e8f0; font-weight:700; color:#059669; }
-    .correct-answer span { background:#d1fae5; padding:2px 10px; border-radius:4px; color:#047857; margin-left:6px; }
-    .exam-capture-img { max-width:100%; height:auto; display:block; margin:16px auto; border-radius:8px; border:1px solid #e2e8f0; }
-  </style>
-</head>
-<body>
-${resultHtml}
+    function downloadHtml() {
+      const blob = new Blob([JSON.stringify(examData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'prova_' + (examFileName.replace('.pdf', '') || 'ifma') + '.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  </script>
 </body>
-</html>`;
 
-    const blob = new Blob([fullHtml], { type: 'text/html' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href = url;
-    a.download = 'prova_estruturada_' + (examFileName.replace('.pdf','') || 'ifma') + '.html';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }
-</script>
-</body>
 </html>

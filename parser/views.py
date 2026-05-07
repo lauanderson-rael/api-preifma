@@ -4,6 +4,10 @@ from django.http import JsonResponse, HttpRequest
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.conf import settings
+import json
+import zipfile
+import tempfile
+import os
 
 from .services import run_pipeline, save_exam_to_db
 
@@ -41,8 +45,8 @@ def process(request: HttpRequest):
         exam_bytes = exam_file.read()
         answer_key_bytes = answer_key_file.read() if answer_key_file else None
 
-        html_result = run_pipeline(exam_bytes, answer_key_bytes, api_key=api_key)
-        return JsonResponse({"html": html_result})
+        exam_json = run_pipeline(exam_bytes, answer_key_bytes, api_key=api_key)
+        return JsonResponse(exam_json)
 
     except Exception as exc:
         traceback.print_exc()
@@ -53,23 +57,75 @@ def process(request: HttpRequest):
 @require_http_methods(["POST"])
 def save_to_db_view(request: HttpRequest):
     """
-    Recebe o HTML estruturado via POST e salva no banco de dados.
+    Recebe os dados da prova (HTML ou JSON) via POST e salva no banco de dados.
     """
     import json
     try:
         data = json.loads(request.body)
-        html_content = data.get("html", "")
-        year = data.get("ano") # Pode vir nulo
         
-        if not html_content:
-            return JsonResponse({"error": "Nenhum HTML recebido."}, status=400)
+        # Tenta extrair do campo 'html' (formato legado do Gemini) 
+        # ou usa o objeto inteiro (formato JSON estruturado)
+        payload = data.get("html", data)
+        year = data.get("ano")
+        
+        if not payload:
+            return JsonResponse({"error": "Nenhum conteúdo recebido para salvar."}, status=400)
 
-        result = save_exam_to_db(html_content, default_year=int(year) if year else None)
+        result = save_exam_to_db(payload, default_year=int(year) if year else None)
         
         if "error" in result:
             return JsonResponse(result, status=400)
             
         return JsonResponse(result)
+
+    except Exception as exc:
+        traceback.print_exc()
+        return JsonResponse({"error": str(exc)}, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def ingest_zip_view(request: HttpRequest):
+    """
+    Recebe um arquivo .zip (campo 'zip_file'), extrai e salva no banco.
+    """
+    zip_file = request.FILES.get("zip_file")
+    if not zip_file:
+        return JsonResponse({"error": "Envie o arquivo .zip (campo zip_file)."}, status=400)
+
+    try:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            # Salvar o upload em um arquivo temporário para o ZipFile ler
+            temp_zip_path = os.path.join(tmp_dir, 'upload.zip')
+            with open(temp_zip_path, 'wb+') as destination:
+                for chunk in zip_file.chunks():
+                    destination.write(chunk)
+
+            # Extrair
+            with zipfile.ZipFile(temp_zip_path, 'r') as zip_ref:
+                zip_ref.extractall(tmp_dir)
+
+            # Localizar prova.json
+            json_path = None
+            base_extract_path = tmp_dir
+            for root, dirs, files in os.walk(tmp_dir):
+                if 'prova.json' in files:
+                    json_path = os.path.join(root, 'prova.json')
+                    base_extract_path = root
+                    break
+
+            if not json_path:
+                return JsonResponse({"error": "Arquivo prova.json não encontrado dentro do ZIP."}, status=400)
+
+            with open(json_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+
+            result = save_exam_to_db(data, base_path=base_extract_path)
+            
+            if "error" in result:
+                return JsonResponse(result, status=400)
+                
+            return JsonResponse(result)
 
     except Exception as exc:
         traceback.print_exc()
