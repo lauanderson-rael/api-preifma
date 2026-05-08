@@ -1,0 +1,36 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+&rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+&rsaquo; Importar ZIP
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div>
+            <p>Selecione um arquivo .ZIP que contenha o arquivo <strong>prova.json</strong> e a pasta <strong>images/</strong>.</p>
+            <div class="form-row">
+                {{ form.zip_file.errors }}
+                {{ form.zip_file.label_tag }}
+                {{ form.zip_file }}
+            </div>
+        </div>
+        <div class="submit-row">
+            <input type="submit" value="Iniciar Importação" class="default" name="_save">
+            <a href="../" class="closelink">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+<style>
+    .form-row { padding: 15px; border-bottom: 1px solid #eee; }
+    .submit-row { margin-top: 20px; }
+</style>
+{% endblock %}
