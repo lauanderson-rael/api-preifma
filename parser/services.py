@@ -1,18 +1,13 @@
 import base64
 import io
 import re
-import hashlib
 import json
-import os
 import requests
 import fitz        
 from typing import Optional, Union
 from django.conf import settings  
 from google import genai
 from PIL import Image
-from bs4 import BeautifulSoup
-from django.core.files.base import ContentFile
-from exams.models import Exam, Question, Alternative, Attachment, QuestionAttachment
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 1. PDF Processing & Gemini Integration
@@ -126,15 +121,13 @@ Retorne APENAS o JSON puro, sem markdown (sem ```json), sem explicações adicio
 """
 
 
-
-
 def _call_openrouter(prompt: str, pages: list[PageData], api_key: str) -> str:
     """Chamada para o OpenRouter (estilo OpenAI)"""
     url = "https://openrouter.ai/api/v1/chat/completions"
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
-        "HTTP-Referer": "http://localhost:8000", # Opcional para OpenRouter
+        "HTTP-Referer": "http://localhost:8000", # Opcional
         "X-OpenRouter-Title": "PRE-IFMA Parser"
     }
     
@@ -142,7 +135,6 @@ def _call_openrouter(prompt: str, pages: list[PageData], api_key: str) -> str:
         {"type": "text", "text": prompt}
     ]
     
-    # Adiciona imagens no formato que o OpenRouter espera
     for p in pages:
         content.append({
             "type": "image_url",
@@ -170,7 +162,6 @@ def _call_openrouter(prompt: str, pages: list[PageData], api_key: str) -> str:
 
 
 def transform_exam_to_json(pages: list[PageData], answer_key_text: Optional[str], api_key: str) -> dict:
-    # Prioridade para OpenRouter se a chave começar com 'sk-or-' ou se for configurado explicitamente
     is_openrouter = api_key.startswith('sk-or-') or getattr(settings, 'OPENROUTER_API_KEY', '') == api_key
     
     full_text = "\n\n".join(f"--- PÁGINA {i + 1} ---\n{p.text}" for i, p in enumerate(pages))
@@ -226,190 +217,7 @@ def process_visual_captures_in_json(data: dict, pages: list[PageData]) -> dict:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 2. Funções de Suporte para Ingestão
-# ─────────────────────────────────────────────────────────────────────────────
-
-def _save_image_attachment(src: str, label: Optional[str] = None) -> Optional[Attachment]:
-    """Salva uma imagem base64 na biblioteca e retorna o Attachment."""
-    if not src.startswith('data:image/'):
-        return None
-    format_part, imgstr = src.split(';base64,')
-    ext = format_part.split('/')[-1]
-    img_hash = hashlib.md5(imgstr.encode()).hexdigest()
-    att, _ = Attachment.objects.get_or_create(
-        hash=img_hash,
-        type='image',
-        defaults={
-            'file': ContentFile(base64.b64decode(imgstr), name=f"img_{img_hash}.{ext}"),
-            'label': label
-        }
-    )
-    return att
-
-
-def _save_image_from_path(file_path: str, label: Optional[str] = None) -> Optional[Attachment]:
-    """Lê uma imagem do disco, salva na biblioteca e retorna o Attachment."""
-    if not os.path.exists(file_path):
-        return None
-        
-    with open(file_path, 'rb') as f:
-        img_data = f.read()
-        
-    img_hash = hashlib.md5(img_data).hexdigest()
-    ext = os.path.splitext(file_path)[1].lower().replace('.', '')
-    if not ext: ext = 'jpg'
-
-    att, _ = Attachment.objects.get_or_create(
-        hash=img_hash,
-        type='image',
-        defaults={
-            'file': ContentFile(img_data, name=f"img_{img_hash}.{ext}"),
-            'label': label
-        }
-    )
-    return att
-
-
-def _save_text_attachment(html_content: str, label: Optional[str] = None) -> Optional[Attachment]:
-    """Salva texto HTML limpo na biblioteca e retorna o Attachment."""
-    text_content = html_content.strip()
-    if not text_content:
-        return None
-    text_hash = hashlib.md5(text_content.encode()).hexdigest()
-    att, _ = Attachment.objects.get_or_create(
-        hash=text_hash,
-        type='text',
-        defaults={
-            'content': text_content,
-            'label': label
-        }
-    )
-    return att
-
-# ─────────────────────────────────────────────────────────────────────────────
-# 3. Pipeline de Ingestão Principal
-# ─────────────────────────────────────────────────────────────────────────────
-
-def save_exam_to_db(data: Union[dict, str], default_year: Optional[int] = None, base_path: Optional[str] = None) -> dict:
-    """
-    Ingere uma prova no banco de dados exclusivamente a partir de JSON estruturado.
-    """
-    json_data = None
-    if isinstance(data, dict):
-        json_data = data
-    elif isinstance(data, str) and data.strip().startswith('{'):
-        try:
-            parsed = json.loads(data)
-            if isinstance(parsed, dict) and ("questions" in parsed or "metadata" in parsed):
-                json_data = parsed
-        except json.JSONDecodeError:
-            pass
-
-    if not json_data:
-        return {"error": "Formato inválido. O sistema agora aceita apenas JSON estruturado."}
-    
-    return _save_exam_from_json(json_data, default_year, base_path)
-
-
-def _save_exam_from_json(data: dict, default_year: Optional[int] = None, base_path: Optional[str] = None) -> dict:
-    questions_saved = 0
-    errors = []
-
-    # ── A. Extrair Metadados da Prova ──────────────────────────────────────
-    metadata = data.get("metadata", {})
-    exam_title = metadata.get("exam_title", "Sem Título")
-    year = metadata.get("year") or default_year or 2025
-    exam_type = metadata.get("type", "integrado").lower()
-
-    valid_types = [t[0] for t in Exam.TYPE_CHOICES]
-    if exam_type not in valid_types:
-        exam_type = 'integrado'
-
-    exam, _ = Exam.objects.get_or_create(
-        year=year,
-        type=exam_type,
-        defaults={'name': exam_title}
-    )
-
-    # ── B. Construir a Biblioteca Global de Anexos ─────────────────────────
-    attachment_library: dict[str, Attachment] = {}
-    global_attachments = data.get("global_attachments", [])
-    for item in global_attachments:
-        label = item.get("label", "").strip()
-        item_id = item.get("id", "").strip()
-        att_type = item.get("type")
-        
-        att = None
-        if att_type == "image":
-            image_data = item.get("image_data", "")
-            relative_path = item.get("path", "")
-            
-            if image_data:
-                att = _save_image_attachment(image_data, label=label)
-            elif relative_path and base_path:
-                full_path = os.path.join(base_path, relative_path)
-                att = _save_image_from_path(full_path, label=label)
-                
-        elif att_type == "text":
-            content = item.get("content", "")
-            if content:
-                att = _save_text_attachment(content, label=label)
-        
-        if att:
-            if label: attachment_library[label] = att
-            if item_id: attachment_library[item_id] = att
-
-    # ── C. Processar Questões ──────────────────────────────────────────────
-    questions_list = data.get("questions", [])
-    for q_data in questions_list:
-        try:
-            q_number = q_data.get("number", 0)
-            subject = q_data.get("subject", "portugues").lower()
-            if subject not in [s[0] for s in Question.SUBJECT_CHOICES]:
-                subject = 'portugues'
-            
-            statement = q_data.get("text", "")
-            correct_letter = q_data.get("correct_answer", "").upper()
-
-            # 1. Criar ou Reutilizar Questão
-            question, _ = Question.objects.update_or_create(
-                exam=exam,
-                number=q_number,
-                defaults={'subject': subject, 'statement': statement}
-            )
-
-            # 2. Vincular Anexos
-            QuestionAttachment.objects.filter(question=question).delete()
-            local_refs = q_data.get("local_attachments", [])
-            for i, ref_key in enumerate(local_refs):
-                att = attachment_library.get(ref_key.strip())
-                if att:
-                    QuestionAttachment.objects.create(
-                        question=question,
-                        attachment=att,
-                        order=i + 1
-                    )
-
-            # 3. Alternativas
-            alternatives = q_data.get("alternatives", [])
-            for alt in alternatives:
-                letter = alt.get("letter", "").upper()
-                alt_text = alt.get("text", "")
-                if letter and alt_text:
-                    Alternative.objects.update_or_create(
-                        question=question,
-                        letter=letter,
-                        defaults={'text': alt_text, 'is_correct': (letter == correct_letter)}
-                    )
-            questions_saved += 1
-        except Exception as e:
-            errors.append(f"Questão {q_data.get('number', '?')}: {str(e)}")
-
-    return {"saved": questions_saved, "errors": errors, "attachments_in_library": len(attachment_library), "exam": exam.name}
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# 4. Pipeline Completo (PDF → JSON → DB)
+# 2. Pipeline Completo (PDF → JSON)
 # ─────────────────────────────────────────────────────────────────────────────
 
 def run_pipeline(exam_bytes: bytes, answer_key_bytes: Optional[bytes] = None, api_key: str = "") -> dict:

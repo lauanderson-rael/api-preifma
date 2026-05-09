@@ -7,7 +7,7 @@ import json
 import zipfile
 import tempfile
 import os
-from parser.services import save_exam_to_db
+from .services import save_exam_to_db
 from .models import Attachment, Exam, Question, QuestionAttachment, Alternative
 
 

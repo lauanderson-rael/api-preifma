@@ -3,13 +3,14 @@ from django.shortcuts import render
 from django.http import JsonResponse, HttpRequest
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-from django.conf import settings
+from django.conf import settings 
 import json
 import zipfile
 import tempfile
 import os
 
-from .services import run_pipeline, save_exam_to_db
+from .services import run_pipeline
+from exams.services import save_exam_to_db
 
 
 def index(request: HttpRequest):
