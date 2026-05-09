@@ -286,46 +286,14 @@ def _save_text_attachment(html_content: str, label: Optional[str] = None) -> Opt
     )
     return att
 
-def _process_attachment_item(item_div) -> Optional[Attachment]:
-    """
-    Processa um div.attachment-item do Modelo 02.
-    Retorna EXATAMENTE um Attachment por div (proporção 1:1):
-      - Se contém <img> → salva como type='image' (ignora o rótulo de texto).
-      - Se é só texto    → salva como type='text'.
-    Separa 'label' (antes do :) e 'content' (depois do :), limpando tags <span>.
-    """
-    raw_html = item_div.decode_contents().strip()
-    label = None
-    content = raw_html
-
-    if ":" in raw_html:
-        parts = raw_html.split(":", 1)
-        label = parts[0].strip()
-        content = parts[1].strip()
-        
-    # Limpa tags <span> e </span> do content
-    content = content.replace("<span>", "").replace("</span>", "").strip()
-
-    img_tag = item_div.find('img')
-
-    if img_tag:
-        # Anexo é uma imagem (gráfico, charge, tabela…)
-        return _save_image_attachment(img_tag.get('src', ''), label=label)
-    else:
-        # Anexo é texto puro
-        return _save_text_attachment(content, label=label)
-
-
 # ─────────────────────────────────────────────────────────────────────────────
-# 3. Pipeline de Ingestão Principal (Modelo 02)
+# 3. Pipeline de Ingestão Principal
 # ─────────────────────────────────────────────────────────────────────────────
 
 def save_exam_to_db(data: Union[dict, str], default_year: Optional[int] = None, base_path: Optional[str] = None) -> dict:
     """
-    Ingere uma prova no banco de dados. 
-    Suporta o formato legado (HTML via BeautifulSoup) e o novo formato (JSON estruturado).
+    Ingere uma prova no banco de dados exclusivamente a partir de JSON estruturado.
     """
-    # Tenta detectar se é o novo formato JSON
     json_data = None
     if isinstance(data, dict):
         json_data = data
@@ -337,11 +305,10 @@ def save_exam_to_db(data: Union[dict, str], default_year: Optional[int] = None, 
         except json.JSONDecodeError:
             pass
 
-    if json_data:
-        return _save_exam_from_json(json_data, default_year, base_path)
+    if not json_data:
+        return {"error": "Formato inválido. O sistema agora aceita apenas JSON estruturado."}
     
-    # Caso contrário, assume o formato HTML legado
-    return _save_exam_from_html(str(data), default_year)
+    return _save_exam_from_json(json_data, default_year, base_path)
 
 
 def _save_exam_from_json(data: dict, default_year: Optional[int] = None, base_path: Optional[str] = None) -> dict:
@@ -365,7 +332,6 @@ def _save_exam_from_json(data: dict, default_year: Optional[int] = None, base_pa
     )
 
     # ── B. Construir a Biblioteca Global de Anexos ─────────────────────────
-    # Mapeia tanto label quanto ID para garantir que as referências funcionem
     attachment_library: dict[str, Attachment] = {}
     global_attachments = data.get("global_attachments", [])
     for item in global_attachments:
@@ -412,7 +378,7 @@ def _save_exam_from_json(data: dict, default_year: Optional[int] = None, base_pa
                 defaults={'subject': subject, 'statement': statement}
             )
 
-            # 2. Vincular Anexos (Limpa antigos para garantir nova ordem)
+            # 2. Vincular Anexos
             QuestionAttachment.objects.filter(question=question).delete()
             local_refs = q_data.get("local_attachments", [])
             for i, ref_key in enumerate(local_refs):
@@ -438,102 +404,6 @@ def _save_exam_from_json(data: dict, default_year: Optional[int] = None, base_pa
             questions_saved += 1
         except Exception as e:
             errors.append(f"Questão {q_data.get('number', '?')}: {str(e)}")
-
-    return {"saved": questions_saved, "errors": errors, "attachments_in_library": len(attachment_library), "exam": exam.name}
-
-
-def _save_exam_from_html(html_content: str, default_year: Optional[int] = None) -> dict:
-    soup = BeautifulSoup(html_content, 'html.parser')
-    questions_saved = 0
-    errors = []
-
-    # ── A. Extrair Título e Metadados da Prova ─────────────────────────────
-    all_text = soup.get_text().lower()
-    extracted_year = default_year or 2025
-    year_match = re.search(r'(20\d{2})', all_text)
-    if year_match:
-        extracted_year = int(year_match.group(1))
-
-    extracted_type = 'integrado'
-    title_el = soup.find('h1', class_='exam-title')
-    search_text = title_el.get_text().lower() if title_el else all_text
-    if 'subsequente' in search_text:
-        extracted_type = 'subsequente'
-    elif 'concomitante' in search_text:
-        extracted_type = 'concomitante'
-
-    exam_name = f"SELETIVO TÉCNICO - {extracted_type.upper()} {extracted_year}"
-    exam, _ = Exam.objects.get_or_create(
-        year=extracted_year,
-        type=extracted_type,
-        defaults={'name': exam_name}
-    )
-
-    # ── B. Construir a Biblioteca Global de Anexos ─────────────────────────
-    attachment_library: dict[str, Attachment] = {}
-    global_section = soup.find('section', class_='attachments-global')
-    if global_section:
-        for item in global_section.find_all('div', class_='attachment-item'):
-            item_id = item.get('id', '').strip()
-            if not item_id: continue
-            att = _process_attachment_item(item)
-            if att: attachment_library[item_id] = att
-
-    # ── C. Processar Questões ──────────────────────────────────────────────
-    blocks = soup.find_all('article', class_='question-block')
-    for block in blocks:
-        try:
-            num_attr = block.get('data-question-number', '0')
-            question_number = int(num_attr) if str(num_attr).isdigit() else 0
-
-            meta_el = block.find('div', class_='question-meta')
-            meta_text = meta_el.get_text().lower() if meta_el else ""
-            subject = 'portugues'
-            if any(k in meta_text for k in ['matem', 'math', 'raciocin']):
-                subject = 'matematica'
-
-            question, _ = Question.objects.get_or_create(
-                exam=exam,
-                number=question_number,
-                defaults={'subject': subject, 'statement': ''}
-            )
-
-            # Limpa vínculos antigos para garantir nova ordem
-            QuestionAttachment.objects.filter(question=question).delete()
-            context_div = block.find('div', class_='question-context')
-            if context_div:
-                for i, ref in enumerate(context_div.find_all('div', class_='attachment-ref')):
-                    ref_id = ref.get('data-ref', '').strip()
-                    att = attachment_library.get(ref_id)
-                    if att:
-                        QuestionAttachment.objects.create(
-                            question=question,
-                            attachment=att,
-                            order=i + 1
-                        )
-
-            statement_el = block.find('div', class_='question-statement')
-            statement_html = statement_el.decode_contents().strip() if statement_el else ""
-            statement_html = re.sub(r'^\s*\d+[\s.)-]+\s*', '', statement_html, count=1)
-            question.statement = statement_html
-            question.save()
-
-            correct_letter = block.get('data-correct-alternative', '').upper()
-            alt_list = block.find('div', class_='question-alternatives')
-            if alt_list:
-                for item in alt_list.find_all('li'):
-                    text = item.get_text().strip()
-                    if len(text) >= 2:
-                        letter = text[0].upper()
-                        content = text[3:] if text[1:3] == ") " else (text[2:] if text[1] == ")" else text)
-                        Alternative.objects.update_or_create(
-                            question=question,
-                            letter=letter,
-                            defaults={'text': content, 'is_correct': (letter == correct_letter)}
-                        )
-            questions_saved += 1
-        except Exception as e:
-            errors.append(f"Questão {block.get('data-question-number', '?')}: {str(e)}")
 
     return {"saved": questions_saved, "errors": errors, "attachments_in_library": len(attachment_library), "exam": exam.name}
 

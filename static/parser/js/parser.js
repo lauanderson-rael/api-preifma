@@ -162,15 +162,15 @@ function renderAttachments() {
       <div class="md:col-span-1 space-y-4">
         <div class="space-y-1">
           <label class="text-[10px] font-black text-slate-400 uppercase">ID</label>
-          <input type="text" value="${att.id}" onchange="updateAttachmentField(${idx}, 'id', this.value)">
+          <input class="p-2" type="text" value="${att.id}" onchange="updateAttachmentField(${idx}, 'id', this.value)">
         </div>
         <div class="space-y-1">
           <label class="text-[10px] font-black text-slate-400 uppercase">Label</label>
-          <input type="text" value="${att.label}" onchange="updateAttachmentField(${idx}, 'label', this.value)">
+          <input class="p-2" type="text" value="${att.label}" onchange="updateAttachmentField(${idx}, 'label', this.value)">
         </div>
         <div class="space-y-1">
           <label class="text-[10px] font-black text-slate-400 uppercase">Tipo</label>
-          <select onchange="updateAttachmentField(${idx}, 'type', this.value)">
+          <select class="p-2" onchange="updateAttachmentField(${idx}, 'type', this.value)">
             <option value="text" ${att.type === 'text' ? 'selected' : ''}>Texto</option>
             <option value="image" ${att.type === 'image' ? 'selected' : ''}>Imagem</option>
           </select>
@@ -180,7 +180,7 @@ function renderAttachments() {
         ${att.type === 'text' ? `
           <div class="space-y-1 h-full">
             <label class="text-[10px] font-black text-slate-400 uppercase">Conteúdo</label>
-            <textarea class="h-40" onchange="updateAttachmentField(${idx}, 'content', this.value)">${att.content || ''}</textarea>
+            <textarea class="h-40 p-2" onchange="updateAttachmentField(${idx}, 'content', this.value)">${att.content || ''}</textarea>
           </div>
         ` : `
           <div class="space-y-2">
@@ -232,7 +232,7 @@ function renderQuestions() {
     card.innerHTML = `
       <div class="bg-slate-50 px-6 py-4 border-b flex items-center justify-between">
         <div class="flex items-center gap-4">
-          <div class="bg-slate-900 text-white w-10 h-10 rounded-xl flex items-center justify-center font-black text-lg shadow-lg">${q.number}</div>
+          <div class="bg-slate-700 text-white w-10 h-10 rounded-full flex items-center justify-center font-black text-lg shadow-lg">${q.number}</div>
           <div class="space-y-1">
             <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Matéria</label>
             <input type="text" value="${q.subject}" onchange="updateQuestionField(${qIdx}, 'subject', this.value)" class="bg-transparent border-none p-0 font-bold text-slate-700 focus:ring-0 w-32">
@@ -245,7 +245,7 @@ function renderQuestions() {
       <div class="p-8 space-y-6">
         <div class="space-y-1">
           <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Enunciado</label>
-          <textarea class="h-32" onchange="updateQuestionField(${qIdx}, 'text', this.value)">${q.text}</textarea>
+          <textarea class="h-32 p-2" onchange="updateQuestionField(${qIdx}, 'text', this.value)">${q.text}</textarea>
         </div>
         
         <div class="space-y-2">
@@ -263,14 +263,14 @@ function renderQuestions() {
         <div class="grid grid-cols-1 gap-3">
           <div class="flex items-center justify-between">
             <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Alternativas</label>
-            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Gabarito</label>
+        
           </div>
           ${q.alternatives.map((alt, aIdx) => `
             <div class="flex gap-3">
               <button onclick="setCorrectAnswer(${qIdx}, '${alt.letter}')" class="w-10 h-10 rounded-xl flex items-center justify-center font-black shrink-0 border-2 transition-all ${q.correct_answer === alt.letter ? 'bg-green-600 border-green-600 text-white shadow-lg' : 'bg-slate-50 border-slate-200 text-slate-400 hover:border-green-300'}">
                 ${alt.letter}
               </button>
-              <input type="text" value="${alt.text}" onchange="updateAlternative(${qIdx}, ${aIdx}, this.value)" class="bg-slate-50">
+              <input type="text" value="${alt.text}" onchange="updateAlternative(${qIdx}, ${aIdx}, this.value)" class="bg-slate-50 px-2">
             </div>
           `).join('')}
         </div>
@@ -383,7 +383,14 @@ function switchTab(tabId) {
   }
 
   if (tabId === 'raw') {
-    document.getElementById('raw-json-viewer').innerText = JSON.stringify(currentExamData, null, 2);
+    const previewData = JSON.parse(JSON.stringify(currentExamData));
+    previewData.global_attachments.forEach(att => {
+      if (att.type === 'image') {
+        delete att.image_data;
+        att.path = `images/${att.id}.jpg`;
+      }
+    });
+    document.getElementById('raw-json-viewer').innerText = JSON.stringify(previewData, null, 2);
   }
 }
 
@@ -503,7 +510,6 @@ function addQuestion() {
       { letter: 'B', text: '' },
       { letter: 'C', text: '' },
       { letter: 'D', text: '' },
-      { letter: 'E', text: '' }
     ],
     correct_answer: 'A'
   });

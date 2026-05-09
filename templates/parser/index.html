@@ -95,20 +95,36 @@
       position: fixed;
       inset: 0;
       z-index: 100;
-      background: rgba(0, 0, 0, 0.85);
+      background: rgba(0, 0, 0, 0.9);
       align-items: center;
       justify-content: center;
-      padding: 1rem;
+      padding: 2rem;
     }
 
     .cropper-container-inner {
       background: white;
       border-radius: 1rem;
-      max-width: 95vw;
-      max-height: 95vh;
+      width: 100%;
+      max-width: 1000px;
+      height: 90vh;
       display: flex;
       flex-direction: column;
       overflow: hidden;
+    }
+
+    .img-container {
+      flex: 1;
+      background: #000;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .img-container img {
+      max-width: 100%;
+      display: block;
     }
   </style>
 </head>
@@ -180,7 +196,7 @@
           </div>
           <div class="space-y-2">
             <label class="text-xs font-black text-slate-400 uppercase tracking-widest block">2. Gabarito
-              (Opcional PDF)</label>
+              (PDF)</label>
             <label
               class="flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-xl p-6 cursor-pointer hover:border-green-400 hover:bg-slate-50 transition-all group min-h-[140px]"
               id="key-label">
@@ -295,15 +311,15 @@
                 <div class="md:col-span-2 space-y-1">
                   <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Título
                     da Prova</label>
-                  <input type="text" id="meta-title" class="font-bold text-lg">
+                  <input type="text" id="meta-title" class="text-lg p-2">
                 </div>
                 <div class="space-y-1">
                   <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Ano</label>
-                  <input type="number" id="meta-year" class="font-bold">
+                  <input type="number" id="meta-year" class=" p-2">
                 </div>
                 <div class="space-y-1">
-                  <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Tipo</label>
-                  <select id="meta-type" class="font-bold">
+                  <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ">Tipo</label>
+                  <select id="meta-type" class="p-2">
                     <option value="INTEGRADO">Integrado</option>
                     <option value="SUBSEQUENTE">Subsequente</option>
                     <option value="CONCOMITANTE">Concomitante</option>
@@ -320,7 +336,7 @@
                 <h3 class="text-xl font-black text-slate-900">Anexos Globais</h3>
               </div>
               <button onclick="addAttachment()"
-                class="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg text-xs font-bold hover:bg-slate-800">
+                class="flex items-center gap-2 px-4 py-2 bg-green-700 text-white rounded-lg text-xs font-bold hover:bg-slate-800">
                 <i data-lucide="plus" class="w-4 h-4"></i> ADICIONAR ANEXO
               </button>
             </div>
@@ -334,7 +350,7 @@
                 <h3 class="text-xl font-black text-slate-900">Questões</h3>
               </div>
               <button onclick="addQuestion()"
-                class="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg text-xs font-bold hover:bg-slate-800">
+                class="flex items-center gap-2 px-4 py-2 bg-green-700 text-white rounded-lg text-xs font-bold hover:bg-slate-800">
                 <i data-lucide="plus" class="w-4 h-4"></i> ADICIONAR QUESTÃO
               </button>
             </div>
@@ -381,7 +397,7 @@
   </div>
   <!-- Cropper Modal -->
   <div id="cropper-modal">
-    <div class="cropper-container-inner space-y-4">
+    <div class="cropper-container-inner space-y-4 p-4">
       <div class="flex items-center justify-between border-b pb-4">
         <h3 class="font-black text-slate-900">Ajustar Recorte</h3>
         <button onclick="closeCropper()" class="p-2 hover:bg-slate-100 rounded-full text-slate-400">

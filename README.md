@@ -76,9 +76,12 @@ python manage.py runserver
 ---
 
 ## 📤 Ingestão de Provas (Parser)
-O sistema possui uma ferramenta automatizada para transformar provas em PDF em questões estruturadas no banco de dados.
+O sistema possui ferramentas para transformar provas em dados estruturados.
 
-*   **Via Web:** Acesse `http://localhost:8000/` para usar a interface visual do Parser.
-*   **Via Admin (Recomendado):** Vá em **Exams > Provas** no Django Admin e use o botão **"Importar Prova (ZIP)"** para subir um arquivo `.zip` contendo o `prova.json` e a pasta de `images/`.
+### 1. Interface Web (IA)
+Acesse `http://localhost:8000/` para usar o Parser Inteligente.
 
----
+### 2. Ingestão via API (ZIP)
+*   **Endpoint:** `POST /ingest-zip/` 
+*   **Payload:** `multipart/form-data` (campo `zip_file`)
+*   **Requisito:** O ZIP deve conter `prova.json` e uma pasta `images/`.
