@@ -1,966 +1,404 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>IFMA Parser Pro</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PRE-IFMA Parser | Estruturador de Provas</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
   <style>
-    /* ── Reset & Base ──────────────────────────────────────────────────── */
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+    :root {
+      --primary: #15803d;
+      --primary-dark: #166534;
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: system-ui, -apple-system, sans-serif;
       background: #f8fafc;
-      color: #0f172a;
-      min-height: 100vh;
     }
 
-    /* ── Header ───────────────────────────────────────────────────────── */
-    header {
-      background: white;
-      border-bottom: 1px solid #e2e8f0;
-      position: sticky;
-      top: 0;
-      z-index: 10;
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
     }
 
-    .header-inner {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 14px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .logo-icon {
-      background: #4f46e5;
-      color: white;
-      width: 36px;
-      height: 36px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .logo-icon svg {
-      width: 20px;
-      height: 20px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 2;
-    }
-
-    .logo h1 {
-      font-size: 1.15rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
-
-    .header-actions {
-      display: flex;
-      gap: 8px;
-    }
-
-    .btn-copy,
-    .btn-download {
-      display: none;
-      /* shown via JS */
-      align-items: center;
-      gap: 6px;
-      padding: 6px 14px;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      cursor: pointer;
-      border: none;
-      transition: background 0.15s;
-    }
-
-    .btn-copy {
-      background: white;
-      border: 1px solid #e2e8f0;
-      color: #334155;
-    }
-
-    .btn-copy:hover {
-      background: #f1f5f9;
-    }
-
-    .btn-download {
-      background: #4f46e5;
-      color: white;
-    }
-
-    .btn-download:hover {
-      background: #4338ca;
-    }
-
-    .btn-copy svg,
-    .btn-download svg {
-      width: 15px;
-      height: 15px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 2;
-    }
-
-    /* ── Main ─────────────────────────────────────────────────────────── */
-    main {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 48px 20px;
-    }
-
-    .hero {
-      text-align: center;
-      margin-bottom: 44px;
-    }
-
-    .hero h2 {
-      font-size: 2rem;
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      margin-bottom: 12px;
-    }
-
-    .hero p {
-      color: #64748b;
-      font-size: 1rem;
-      max-width: 480px;
-      margin: 0 auto;
-    }
-
-    /* ── Upload Grid ──────────────────────────────────────────────────── */
-    section.upload-section {
-      max-width: 680px;
-      margin: 0 auto;
-    }
-
-    .upload-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-bottom: 20px;
-    }
-
-    @media (max-width: 600px) {
-      .upload-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .upload-label {
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: #475569;
-      display: block;
-      margin-bottom: 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    .drop-zone {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      border: 2px dashed #cbd5e1;
-      border-radius: 14px;
-      padding: 28px 16px;
-      background: white;
-      cursor: pointer;
-      transition: border-color 0.2s, background 0.2s;
-      text-align: center;
-      min-height: 120px;
-    }
-
-    .drop-zone:hover {
-      border-color: #818cf8;
-    }
-
-    .drop-zone.filled {
-      border-color: #34d399;
-      background: #f0fdf4;
-    }
-
-    .drop-zone svg {
-      width: 26px;
-      height: 26px;
-      fill: none;
-      stroke: #94a3b8;
-      stroke-width: 1.8;
-      margin-bottom: 8px;
-      transition: stroke 0.2s;
-    }
-
-    .drop-zone.filled svg {
-      stroke: #059669;
-    }
-
-    .drop-zone span {
-      font-size: 0.85rem;
-      font-weight: 500;
-      color: #64748b;
-    }
-
-    .drop-zone.filled span {
-      color: #065f46;
-    }
-
-    .drop-zone input {
-      display: none;
-    }
-
-    /* ── API Key Warning ──────────────────────────────────────────────── */
-    .api-warning {
-      background: #fef3c7;
-      border: 1px solid #fde68a;
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
       border-radius: 10px;
-      padding: 14px 18px;
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      margin-bottom: 20px;
-      font-size: 0.875rem;
-      color: #92400e;
     }
 
-    .api-warning svg {
-      width: 18px;
-      height: 18px;
-      flex-shrink: 0;
-      fill: none;
-      stroke: #d97706;
-      stroke-width: 2;
-      margin-top: 1px;
+    .btn-primary {
+      background: var(--primary);
+      transition: all 0.2s;
     }
 
-    .api-key-input {
-      width: 100%;
-      margin-top: 8px;
-      padding: 8px 12px;
-      border: 1px solid #fcd34d;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      background: white;
-      color: #1e293b;
-      font-family: monospace;
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
     }
 
-    /* ── Submit Button ────────────────────────────────────────────────── */
-    .btn-submit {
-      width: 100%;
-      padding: 16px;
-      background: #4f46e5;
-      color: white;
-      border: none;
-      border-radius: 12px;
-      font-size: 1rem;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: background 0.2s, opacity 0.2s;
-      box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
+    .sidebar-item.active {
+      background: #f0fdf4;
+      color: var(--primary);
+      border-right: 4px solid var(--primary);
     }
 
-    .btn-submit:hover:not(:disabled) {
-      background: #4338ca;
-    }
-
-    .btn-submit:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    /* ── States ───────────────────────────────────────────────────────── */
-    #state-idle {
-      display: block;
-    }
-
-    #state-loading {
-      display: none;
-    }
-
-    #state-success {
-      display: none;
-    }
-
-    #state-error {
-      display: none;
-    }
-
-    .loading-card {
+    .card {
       background: white;
       border: 1px solid #e2e8f0;
-      border-radius: 20px;
-      padding: 60px 40px;
-      text-align: center;
+      border-radius: 0.75rem;
+      box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
     }
 
-    .spinner {
-      width: 52px;
-      height: 52px;
-      border: 4px solid #e0e7ff;
-      border-top-color: #4f46e5;
+    input,
+    textarea,
+    select {
+      border: 1px solid #e2e8f0;
+      border-radius: 0.5rem;
+      padding: 0.5rem;
+      width: 100%;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: var(--primary);
+    }
+
+    .loader {
+      border: 2px solid #f3f3f3;
+      border-top: 2px solid var(--primary);
       border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin: 0 auto 24px;
+      width: 16px;
+      height: 16px;
+      animation: spin 1s linear infinite;
     }
 
     @keyframes spin {
-      to {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
         transform: rotate(360deg);
       }
     }
 
-    .loading-card h3 {
-      font-size: 1.2rem;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-
-    .loading-card p {
-      color: #94a3b8;
-    }
-
-    #loading-status {
-      font-weight: 700;
-      color: #4f46e5;
-    }
-
-    .success-banner {
-      background: #ecfdf5;
-      border: 1px solid #a7f3d0;
-      border-radius: 12px;
-      padding: 14px 18px;
-      display: flex;
+    #cropper-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(0, 0, 0, 0.85);
       align-items: center;
-      gap: 10px;
-      color: #065f46;
-      font-weight: 500;
-      margin-bottom: 20px;
+      justify-content: center;
+      padding: 1rem;
     }
 
-    .success-banner svg {
-      width: 20px;
-      height: 20px;
-      fill: none;
-      stroke: #059669;
-      stroke-width: 2;
-      flex-shrink: 0;
-    }
-
-    .btn-reset {
-      margin-left: auto;
-      font-size: 0.85rem;
-      text-decoration: underline;
-      font-weight: 700;
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: #065f46;
-    }
-
-    /* Code viewer */
-    .code-viewer {
-      background: #0f172a;
-      border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 20px;
-      border: 1px solid #1e293b;
-    }
-
-    .code-scroll {
-      max-height: 280px;
-      overflow: auto;
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: 8px;
-      padding: 14px;
-      white-space: pre-wrap;
-      font-family: monospace;
-      font-size: 0.72rem;
-      color: #a5b4fc;
-      line-height: 1.6;
-    }
-
-    /* Preview card */
-    .preview-card {
+    .cropper-container-inner {
       background: white;
-      border: 1px solid #e2e8f0;
-      border-radius: 16px;
-      padding: 28px;
-    }
-
-    .preview-title {
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: #94a3b8;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      margin-bottom: 16px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid #f1f5f9;
-    }
-
-    /* Error */
-    .error-box {
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-      border-radius: 12px;
-      padding: 16px 20px;
+      border-radius: 1rem;
+      max-width: 95vw;
+      max-height: 95vh;
       display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      color: #991b1b;
-      margin-top: 16px;
-    }
-
-    .error-box svg {
-      width: 18px;
-      height: 18px;
-      fill: none;
-      stroke: #dc2626;
-      stroke-width: 2;
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
-
-    /* ── Exam HTML Styles (preview) ───────────────────────────────────── */
-    #preview-area .exam-title {
-      text-align: center;
-      font-size: 1.3rem;
-      font-weight: 800;
-      border-bottom: 2px solid #4f46e5;
-      padding-bottom: 14px;
-      margin-bottom: 28px;
-      text-transform: uppercase;
-      color: #1e293b;
-    }
-
-    #preview-area .question-block {
-      margin-bottom: 36px;
-      padding: 20px;
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-    }
-
-    #preview-area .question-meta {
-      font-size: 0.7rem;
-      font-weight: 700;
-      color: #818cf8;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 6px;
-    }
-
-    #preview-area .question-number {
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: #4f46e5;
-      margin-bottom: 12px;
-    }
-
-    #preview-area .question-context {
-      font-style: italic;
-      color: #475569;
-      margin-bottom: 18px;
-      padding-bottom: 18px;
-      border-bottom: 1px solid #e2e8f0;
-      font-size: 0.88rem;
-      line-height: 1.7;
-    }
-
-    #preview-area .question-statement {
-      font-weight: 500;
-      margin-bottom: 16px;
-      line-height: 1.65;
-    }
-
-    #preview-area .question-alternatives ul {
-      list-style: none;
-      padding: 0;
-    }
-
-    #preview-area .question-alternatives li {
-      padding: 10px 14px;
-      background: white;
-      border: 1px solid #e2e8f0;
-      margin-bottom: 8px;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      line-height: 1.5;
-    }
-
-    #preview-area .correct-answer {
-      margin-top: 18px;
-      padding-top: 14px;
-      border-top: 1px solid #e2e8f0;
-      font-weight: 700;
-      color: #059669;
-    }
-
-    #preview-area .correct-answer span {
-      background: #d1fae5;
-      padding: 2px 10px;
-      border-radius: 4px;
-      color: #047857;
-      margin-left: 6px;
-    }
-
-    #preview-area .exam-capture-img {
-      max-width: 100%;
-      height: auto;
-      display: block;
-      margin: 16px auto;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      border: 1px solid #e2e8f0;
+      flex-direction: column;
+      overflow: hidden;
     }
   </style>
 </head>
 
-<body>
-  <header>
-    <div class="header-inner">
-      <div class="logo">
-        <div class="logo-icon">
-          <svg viewBox="0 0 24 24">
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-          </svg>
+<body class="min-h-screen">
+  <!-- Header -->
+  <header class="sticky top-0 z-40 w-full border-b bg-green-700 backdrop-blur-md">
+    <div class="container mx-auto px-4 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <!-- <div class="bg-green-700 p-2 rounded-xl text-white shadow-lg shadow-green-200">
+          <i data-lucide="file-text" class="w-6 h-6"></i>
+        </div> -->
+        <div>
+          <h1 class="font-bold text-lg text-white leading-tight">PRE-IFMA Parser</h1>
+          <!-- <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Estruturador Inteligente de Provas
+            do IFMA</p> -->
         </div>
-        <h1>IFMA Parser Pro</h1>
       </div>
-      <div class="header-actions">
-        <button class="btn-copy" id="btn-copy" onclick="copyHtml()">
-          <svg viewBox="0 0 24 24">
-            <path
-              d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-          </svg>
-          Copiar JSON
-        </button>
-        <button class="btn-download" id="btn-download" onclick="downloadHtml()">
-          <svg viewBox="0 0 24 24">
-            <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-          </svg>
-          Baixar JSON
-        </button>
-        <button class="btn-download" id="btn-save-db" onclick="saveToDb()" style="display:none; background: #059669;">
-          <svg viewBox="0 0 24 24">
-            <path d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-          </svg>
-          Salvar no Banco
-        </button>
+      <div class="flex items-center gap-3" id="header-actions">
+        <!-- Actions show up here when results are ready -->
       </div>
     </div>
   </header>
+  <main class="container mx-auto px-4 py-8">
+    <!-- Initial Setup State -->
+    <div id="state-setup" class="max-w-2xl mx-auto space-y-8">
+      <div class="text-center space-y-2">
+        <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Estruturador Inteligente de Provas do IFMA
 
-  <!-- ── MAIN ────────────────────────────────────────────────────────────── -->
-  <main>
-    <div class="hero">
-      <h2>Parser de Provas (JSON)</h2>
-      <p>Envie a prova e o gabarito para estruturar os dados em JSON e subir no banco de dados.</p>
-    </div>
-
-    <section class="upload-section">
-
-      <!-- STATE: IDLE / ERROR ──────────────────────────────────────────── -->
-      <div id="state-idle">
-
-        {% if not has_api_key %}
-        <div class="api-warning">
-          <svg viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
-          <div>
-            <strong>GEMINI_API_KEY não detectada no servidor.</strong><br />
-            Cole sua chave abaixo para esta sessão:
-            <input type="password" class="api-key-input" id="api-key-input" placeholder="AIza..." autocomplete="off" />
+        </h2>
+        <p class="text-slate-500">Transforme provas do IFMA em JSON estruturado, com extração via IA.
+        </p>
+      </div>
+      <!-- ZIP Import Option (Existing Functionality preserved) -->
+      <div class="card p-6 border-2 border-dashed border-green-200 bg-green-50/30">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="bg-green-100 p-2 rounded-lg text-green-700">
+            <i data-lucide="package" class="w-5 h-5"></i>
           </div>
+          <h3 class="font-bold text-slate-800">Importação Rápida via ZIP</h3>
+        </div>
+        <label
+          class="flex flex-col items-center justify-center border-2 border-dashed border-green-300 rounded-xl p-8 cursor-pointer hover:bg-green-50 transition-colors group">
+          <i data-lucide="upload-cloud" class="w-10 h-10 text-green-400 group-hover:text-green-500 mb-2"></i>
+          <span class="text-sm font-semibold text-green-700">Clique para enviar arquivo .ZIP já
+            processado</span>
+          <input type="file" id="zip-upload" class="hidden" accept=".zip">
+        </label>
+      </div>
+      <div class="relative">
+        <div class="absolute inset-0 flex items-center"><span class="w-full border-t"></span></div>
+        <div class="relative flex justify-center text-xs uppercase"><span
+            class="bg-slate-50 px-2 text-slate-500 font-bold">OU USE A IA</span></div>
+      </div>
+      <!-- AI Processing Setup -->
+      <div class="card p-8 space-y-6 shadow-2xl shadow-slate-200">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="space-y-2">
+            <label class="text-xs font-black text-slate-400 uppercase tracking-widest block">1. Arquivo da
+              Prova (PDF)</label>
+            <label
+              class="flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-xl p-6 cursor-pointer hover:border-green-400 hover:bg-slate-50 transition-all group min-h-[140px]"
+              id="exam-label">
+              <i data-lucide="file-up" class="w-8 h-8 text-slate-300 group-hover:text-green-500 mb-2"></i>
+              <span class="text-xs font-bold text-slate-500 group-hover:text-slate-700 text-center"
+                id="exam-filename">PDF da Prova</span>
+              <input type="file" id="exam-pdf" class="hidden" accept=".pdf">
+            </label>
+          </div>
+          <div class="space-y-2">
+            <label class="text-xs font-black text-slate-400 uppercase tracking-widest block">2. Gabarito
+              (Opcional PDF)</label>
+            <label
+              class="flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-xl p-6 cursor-pointer hover:border-green-400 hover:bg-slate-50 transition-all group min-h-[140px]"
+              id="key-label">
+              <i data-lucide="check-circle" class="w-8 h-8 text-slate-300 group-hover:text-green-500 mb-2"></i>
+              <span class="text-xs font-bold text-slate-500 group-hover:text-slate-700 text-center"
+                id="key-filename">PDF do Gabarito</span>
+              <input type="file" id="key-pdf" class="hidden" accept=".pdf">
+            </label>
+          </div>
+        </div>
+        {% if not has_api_key %}
+        <div class="bg-amber-50 border border-amber-100 rounded-xl p-4 space-y-2">
+          <div class="flex items-center gap-2 text-amber-800 font-bold text-sm">
+            <i data-lucide="key" class="w-4 h-4"></i>
+            CHAVE GEMINI NECESSÁRIA
+          </div>
+          <input type="password" id="api-key" placeholder="Insira sua GEMINI_API_KEY"
+            class="w-full bg-white border-amber-200 focus:ring-amber-500">
         </div>
         {% endif %}
-
-        <div class="upload-grid" style="grid-template-columns: 1fr; margin-bottom: 24px;">
-          <div>
-            <label class="upload-label">Opção A: Subir Prova Estruturada (.ZIP com JSON + Imagens)</label>
-            <label class="drop-zone" id="zone-zip" for="input-zip" style="border-color: #4f46e5; background: #f5f3ff;">
-              <svg viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path>
-                <line x1="16" y1="8" x2="2" y2="22"></line>
-                <line x1="17.5" y1="15" x2="9" y2="15"></line>
-              </svg>
-              <span id="label-zip">Selecionar arquivo .ZIP</span>
-              <input type="file" id="input-zip" accept=".zip" onchange="onZipFileChange(this)" />
-            </label>
-          </div>
-        </div>
-
-
-        <label class="upload-label">Opção B: PARSER PROVA COM IA, E EXPORTAR PARA JSON OU BANCO DE DADOS</label>
-        <div class="upload-grid">
-          <div>
-
-            <label class="drop-zone" id="zone-exam" for="input-exam" style="margin-bottom: 5px;">
-              <svg viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-              </svg>
-              <span id="label-exam">Selecionar Prova</span>
-              <input type="file" id="input-exam" accept=".pdf" onchange="onFileChange('exam', this)" />
-            </label>
-
-            <label class="upload-label" style="color: #8994a3; text-transform: capitalize;">1. Arquivo da
-              Prova(PDF)</label>
-          </div>
-          <div>
-
-            <label class="drop-zone" style="margin-bottom: 5px;" id="zone-key" for="input-key">
-              <svg viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              <span id="label-key">Selecionar Gabarito</span>
-              <input type="file" id="input-key" accept=".pdf" onchange="onFileChange('key', this)" />
-            </label>
-            <label class="upload-label" style="color: #8994a3; text-transform: capitalize;">2. Gabarito (Opcional
-              PDF)</label>
-          </div>
-        </div>
-
-        <button class="btn-submit" id="btn-submit" onclick="handleProcess()" disabled>
-          Começar Estruturação
+        <button id="btn-process"
+          class="w-full btn-primary py-4 text-white rounded-xl font-black text-lg shadow-xl shadow-green-200 flex items-center justify-center gap-3 disabled:opacity-50"
+          disabled>
+          <i data-lucide="sparkles" class="w-5 h-5"></i>
+          COMEÇAR PROCESSAMENTO
         </button>
-
-        <div id="state-error" class="error-box">
-          <svg viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="10" />
-            <line x1="12" y1="8" x2="12" y2="12" />
-            <line x1="12" y1="16" x2="12.01" y2="16" />
-          </svg>
-          <span id="error-msg"></span>
+      </div>
+    </div>
+    <!-- Processing State -->
+    <div id="state-processing" class="hidden py-24 text-center space-y-6">
+      <div class="flex justify-center">
+        <div class="relative w-32 h-32">
+          <div class="absolute inset-0 border-4 border-slate-100 rounded-full"></div>
+          <div class="absolute inset-0 border-4 border-t-green-600 rounded-full animate-spin"></div>
+          <div class="absolute inset-0 flex items-center justify-center">
+            <i data-lucide="cpu" class="w-12 h-12 text-green-600"></i>
+          </div>
         </div>
       </div>
-
-      <!-- STATE: LOADING ───────────────────────────────────────────────── -->
-      <div id="state-loading">
-        <div class="loading-card">
-          <div class="spinner"></div>
-          <h3><span id="loading-status">Lendo arquivos...</span></h3>
-          <p>Isso pode levar alguns minutos. Estamos convertendo para JSON.</p>
+      <div class="space-y-2">
+        <h3 class="text-2xl font-black text-slate-900" id="processing-title">Lendo PDF...</h3>
+        <p class="text-slate-500 font-medium">Isso pode levar cerca de 1 a 2 minutos.</p>
+      </div>
+      <div class="max-w-md mx-auto bg-slate-100 rounded-full h-2 overflow-hidden">
+        <div id="progress-bar" class="bg-green-600 h-full w-0 transition-all duration-500"></div>
+      </div>
+    </div>
+    <!-- Editor State -->
+    <div id="state-editor" class="hidden">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <!-- Sidebar -->
+        <aside class="lg:col-span-3">
+          <div class="card sticky top-24 p-2 space-y-1 overflow-hidden">
+            <button onclick="switchTab('metadata')" data-tab="metadata"
+              class="sidebar-item active w-full flex items-center justify-between p-4 rounded-xl font-bold text-sm transition-all group">
+              <div class="flex items-center gap-3">
+                <i data-lucide="settings" class="w-4 h-4"></i>
+                Metadados
+              </div>
+              <i data-lucide="chevron-right" class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+            </button>
+            <button onclick="switchTab('attachments')" data-tab="attachments"
+              class="sidebar-item w-full flex items-center justify-between p-4 rounded-xl font-bold text-sm transition-all group text-slate-500 hover:bg-slate-50">
+              <div class="flex items-center gap-3">
+                <i data-lucide="image" class="w-4 h-4"></i>
+                Anexos
+              </div>
+              <i data-lucide="chevron-right" class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+            </button>
+            <button onclick="switchTab('questions')" data-tab="questions"
+              class="sidebar-item w-full flex items-center justify-between p-4 rounded-xl font-bold text-sm transition-all group text-slate-500 hover:bg-slate-50">
+              <div class="flex items-center gap-3">
+                <i data-lucide="list" class="w-4 h-4"></i>
+                Questões
+              </div>
+              <i data-lucide="chevron-right" class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+            </button>
+            <button onclick="switchTab('raw')" data-tab="raw"
+              class="sidebar-item w-full flex items-center justify-between p-4 rounded-xl font-bold text-sm transition-all group text-slate-500 hover:bg-slate-50">
+              <div class="flex items-center gap-3">
+                <i data-lucide="code" class="w-4 h-4"></i>
+                JSON Raw
+              </div>
+              <i data-lucide="chevron-right" class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+            </button>
+            <div class="mt-4 pt-4 border-t px-2">
+              <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Resumo da
+                Prova</div>
+              <div class="space-y-3">
+                <div class="flex justify-between items-center text-xs">
+                  <span class="text-slate-500 font-medium">Questões:</span>
+                  <span id="stat-q-count" class="font-black text-slate-900">0</span>
+                </div>
+                <div class="flex justify-between items-center text-xs">
+                  <span class="text-slate-500 font-medium">Anexos:</span>
+                  <span id="stat-a-count" class="font-black text-slate-900">0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+        <!-- Content Area -->
+        <div class="lg:col-span-9 space-y-8 pb-32">
+          <!-- Metadata Tab -->
+          <section id="tab-metadata" class="tab-content space-y-6">
+            <div class="card p-8 space-y-6">
+              <div class="flex items-center gap-2">
+                <div class="w-1.5 h-6 bg-green-600 rounded-full"></div>
+                <h3 class="text-xl font-black text-slate-900">Configurações Gerais</h3>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="md:col-span-2 space-y-1">
+                  <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Título
+                    da Prova</label>
+                  <input type="text" id="meta-title" class="font-bold text-lg">
+                </div>
+                <div class="space-y-1">
+                  <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Ano</label>
+                  <input type="number" id="meta-year" class="font-bold">
+                </div>
+                <div class="space-y-1">
+                  <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Tipo</label>
+                  <select id="meta-type" class="font-bold">
+                    <option value="INTEGRADO">Integrado</option>
+                    <option value="SUBSEQUENTE">Subsequente</option>
+                    <option value="CONCOMITANTE">Concomitante</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </section>
+          <!-- Attachments Tab -->
+          <section id="tab-attachments" class="tab-content hidden space-y-6">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <div class="w-1.5 h-6 bg-green-600 rounded-full"></div>
+                <h3 class="text-xl font-black text-slate-900">Anexos Globais</h3>
+              </div>
+              <button onclick="addAttachment()"
+                class="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg text-xs font-bold hover:bg-slate-800">
+                <i data-lucide="plus" class="w-4 h-4"></i> ADICIONAR ANEXO
+              </button>
+            </div>
+            <div id="attachments-container" class="space-y-4"></div>
+          </section>
+          <!-- Questions Tab -->
+          <section id="tab-questions" class="tab-content hidden space-y-6">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <div class="w-1.5 h-6 bg-green-600 rounded-full"></div>
+                <h3 class="text-xl font-black text-slate-900">Questões</h3>
+              </div>
+              <button onclick="addQuestion()"
+                class="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg text-xs font-bold hover:bg-slate-800">
+                <i data-lucide="plus" class="w-4 h-4"></i> ADICIONAR QUESTÃO
+              </button>
+            </div>
+            <div id="questions-container" class="space-y-6"></div>
+          </section>
+          <!-- Raw JSON Tab -->
+          <section id="tab-raw" class="tab-content hidden space-y-6">
+            <div class="card p-8 space-y-4">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <div class="w-1.5 h-6 bg-green-600 rounded-full"></div>
+                  <h3 class="text-xl font-black text-slate-900">JSON Estruturado</h3>
+                </div>
+                <button onclick="copyRawJson()"
+                  class="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg text-xs font-bold hover:bg-slate-200">
+                  <i data-lucide="copy" class="w-4 h-4"></i> COPIAR JSON
+                </button>
+              </div>
+              <pre id="raw-json-viewer"
+                class="bg-slate-900 text-green-400 p-6 rounded-xl overflow-auto max-h-[600px] text-xs font-mono custom-scrollbar"></pre>
+            </div>
+          </section>
         </div>
       </div>
-
-      <!-- STATE: SUCCESS ───────────────────────────────────────────────── -->
-      <div id="state-success">
-        <div class="success-banner">
-          <svg viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span>Estrutura JSON gerada com sucesso!</span>
-          <button class="btn-reset" onclick="resetState()">Novo PDF</button>
-        </div>
-
-        <div class="code-viewer">
-          <div class="code-scroll" id="code-output"></div>
-        </div>
-
-        <div class="preview-card">
-          <div class="preview-title">📄 Preview da Prova (Gerado do JSON)</div>
-          <div id="preview-area"></div>
-        </div>
-      </div>
-
-      <div id="db-status-area" style="margin-top: 20px;"></div>
-
-    </section>
+    </div>
   </main>
-
-  <script>
-    // ── Estado ─────────────────────────────────────────────────────────────
-    let examFile = null;
-    let keyFile = null;
-    let examData = null;
-    let examFileName = '';
-
-    // ── Seleção de arquivos ─────────────────────────────────────────────────
-    function onFileChange(which, input) {
-      const file = input.files[0] || null;
-      if (which === 'exam') {
-        examFile = file;
-        const zone = document.getElementById('zone-exam');
-        const lbl = document.getElementById('label-exam');
-        if (file) { zone.classList.add('filled'); lbl.textContent = file.name; examFileName = file.name; }
-        else { zone.classList.remove('filled'); lbl.textContent = 'Selecionar Prova'; }
-      } else {
-        keyFile = file;
-        const zone = document.getElementById('zone-key');
-        const lbl = document.getElementById('label-key');
-        if (file) { zone.classList.add('filled'); lbl.textContent = file.name; }
-        else { zone.classList.remove('filled'); lbl.textContent = 'Selecionar Gabarito'; }
-      }
-      document.getElementById('btn-submit').disabled = !examFile;
-    }
-
-    // ── Seleção de arquivo ZIP ──────────────────────────────────────────────
-    async function onZipFileChange(input) {
-      const file = input.files[0];
-      if (!file) return;
-
-      if (!confirm(`Deseja subir o arquivo ZIP "${file.name}" para o banco de dados?`)) {
-        input.value = '';
-        return;
-      }
-
-      showState('loading');
-      document.getElementById('loading-status').textContent = 'Enviando e processando ZIP...';
-
-      const form = new FormData();
-      form.append('zip_file', file);
-
-      try {
-        const resp = await fetch('/ingest-zip/', { method: 'POST', body: form });
-        const data = await resp.json();
-
-        if (!resp.ok || data.error) throw new Error(data.error || 'Erro ao processar ZIP.');
-
-        // Exibe preview do que foi salvo
-        examData = data;
-        document.getElementById('code-output').textContent = JSON.stringify(examData, null, 2);
-        renderExam(examData);
-        showState('success');
-
-        const statusArea = document.getElementById('db-status-area');
-        statusArea.innerHTML = `
-        <div class="success-banner">
-          <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-          <span>ZIP Ingerido: ${data.saved} questões salvas!</span>
-        </div>
-      `;
-      } catch (err) {
-        showError(err.message);
-      }
-    }
-
-    // ── Seleção de arquivo JSON ──────────────────────────────────────────────
-    function onJsonFileChange(input) {
-      const file = input.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        try {
-          const content = JSON.parse(e.target.result);
-          if (confirm(`Deseja subir o arquivo JSON "${file.name}" diretamente para o banco de dados?`)) {
-            examData = content;
-            await saveToDb();
-          }
-        } catch (err) {
-          alert("Erro ao ler JSON: " + err.message);
-        }
-      };
-      reader.readAsText(file);
-    }
-
-    // ── Processar ───────────────────────────────────────────────────────────
-    async function handleProcess() {
-      if (!examFile) return;
-      showState('loading');
-      document.getElementById('loading-status').textContent = 'Enviando para o servidor...';
-
-      const form = new FormData();
-      form.append('exam_pdf', examFile);
-      if (keyFile) form.append('answer_key_pdf', keyFile);
-
-      const keyInput = document.getElementById('api-key-input');
-      if (keyInput && keyInput.value.trim()) {
-        form.append('api_key_override', keyInput.value.trim());
-      }
-
-      try {
-        document.getElementById('loading-status').textContent = 'Processando JSON via IA...';
-        const resp = await fetch('/process/', { method: 'POST', body: form });
-        const data = await resp.json();
-
-        if (!resp.ok || data.error) throw new Error(data.error || 'Erro desconhecido.');
-
-        examData = data;
-        document.getElementById('code-output').textContent = JSON.stringify(examData, null, 2);
-
-        renderExam(examData);
-
-        showState('success');
-        document.getElementById('btn-copy').style.display = 'flex';
-        document.getElementById('btn-download').style.display = 'flex';
-        document.getElementById('btn-save-db').style.display = 'flex';
-      } catch (err) {
-        showError(err.message);
-      }
-    }
-
-    // ── Renderizar Prova no Preview ─────────────────────────────────────────
-    function renderExam(data) {
-      const container = document.getElementById('preview-area');
-      let html = '';
-
-      const meta = data.metadata || {};
-      html += `<h1 class="exam-title">${meta.exam_title || 'Sem Título'}</h1>`;
-
-      // Biblioteca de Anexos
-      const attachments = {};
-      (data.global_attachments || []).forEach(att => {
-        attachments[att.id] = att;
-        attachments[att.label] = att;
-      });
-
-      (data.questions || []).forEach(q => {
-        html += `<article class="question-block">
-            <div class="question-meta">${q.subject || ''}</div>
-            <div class="question-number">Questão ${q.number}</div>`;
-
-        // Anexos da questão
-        (q.local_attachments || []).forEach(ref => {
-          const att = attachments[ref];
-          if (att) {
-            if (att.type === 'text') {
-              html += `<div class="question-context">${att.content}</div>`;
-            } else if (att.type === 'image') {
-              html += `<img src="${att.image_data}" class="exam-capture-img" />`;
-            }
-          }
-        });
-
-        html += `<div class="question-statement">${q.text}</div>
-            <div class="question-alternatives"><ul>`;
-
-        (q.alternatives || []).forEach(alt => {
-          const isCorrect = alt.letter === q.correct_answer;
-          html += `<li style="${isCorrect ? 'border-color: #34d399; background: #f0fdf4;' : ''}">
-                <strong>${alt.letter})</strong> ${alt.text}
-            </li>`;
-        });
-
-        html += `</ul></div>
-            <div class="correct-answer">Gabarito: <span>${q.correct_answer}</span></div>
-        </article>`;
-      });
-
-      container.innerHTML = html;
-    }
-
-    // ── Salvar no Banco ─────────────────────────────────────────────────────
-    async function saveToDb() {
-      const btn = document.getElementById('btn-save-db');
-      const statusArea = document.getElementById('db-status-area');
-
-      btn.disabled = true;
-      btn.textContent = 'Salvando...';
-      statusArea.innerHTML = '<div class="success-banner" style="background: #f0f9ff; border-color: #bae6fd; color: #0369a1;">Persistindo dados no Django...</div>';
-
-      try {
-        const resp = await fetch('/save-to-db/', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(examData)
-        });
-        const data = await resp.json();
-
-        if (!resp.ok || data.error) throw new Error(data.error || 'Erro ao salvar.');
-
-        exibirSucesso(data);
-      } catch (err) {
-        statusArea.innerHTML = `<div class="error-box">${err.message}</div>`;
-        btn.disabled = false;
-        btn.textContent = 'Tentar Novamente';
-      }
-    }
-
-    function exibirSucesso(data) {
-      const btn = document.getElementById('btn-save-db');
-      const statusArea = document.getElementById('db-status-area');
-      statusArea.innerHTML = `
-      <div class="success-banner">
-        <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-        <span>${data.saved} questões salvas! (${data.attachments_in_library} anexos)</span>
+  <!-- Footer Actions (Sticky bottom on editor) -->
+  <div id="editor-footer" class="hidden fixed bottom-0 left-0 right-0 bg-white border-t p-4 z-40 shadow-2xl">
+    <div class="container mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <button onclick="resetApp()" class="text-slate-500 font-bold text-sm hover:text-slate-800">DESCARTAR</button>
       </div>
-    `;
-      if (data.errors && data.errors.length > 0) {
-        statusArea.innerHTML += `<div class="error-box">${data.errors.join('<br>')}</div>`;
-      }
-      btn.textContent = 'Salvo!';
-    }
-
-    // ── Helpers de UI ───────────────────────────────────────────────────────
-    function showState(state) {
-      ['idle', 'loading', 'success', 'error'].forEach(s => {
-        const el = document.getElementById('state-' + s);
-        if (el) el.style.display = 'none';
-      });
-      const target = document.getElementById('state-' + state);
-      if (target) target.style.display = 'block';
-    }
-
-    function showError(msg) {
-      showState('idle');
-      const box = document.getElementById('state-error');
-      box.style.display = 'flex';
-      document.getElementById('error-msg').textContent = msg;
-    }
-
-    function resetState() {
-      examFile = null; keyFile = null; examData = null; examFileName = '';
-      document.getElementById('input-exam').value = '';
-      document.getElementById('input-key').value = '';
-      document.getElementById('zone-exam').classList.remove('filled');
-      document.getElementById('zone-key').classList.remove('filled');
-      document.getElementById('label-exam').textContent = 'Selecionar Prova';
-      document.getElementById('label-key').textContent = 'Selecionar Gabarito';
-      document.getElementById('btn-submit').disabled = true;
-      document.getElementById('btn-copy').style.display = 'none';
-      document.getElementById('btn-download').style.display = 'none';
-      document.getElementById('state-error').style.display = 'none';
-      showState('idle');
-    }
-
-    // ── Copiar / Baixar ─────────────────────────────────────────────────────
-    function copyHtml() {
-      navigator.clipboard.writeText(JSON.stringify(examData, null, 2))
-        .then(() => alert('JSON copiado!'))
-        .catch(() => alert('Erro ao copiar.'));
-    }
-
-    function downloadHtml() {
-      const blob = new Blob([JSON.stringify(examData, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'prova_' + (examFileName.replace('.pdf', '') || 'ifma') + '.json';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }
-  </script>
+      <div class="flex items-center gap-4">
+        <button onclick="exportZip()"
+          class="flex items-center gap-2 px-6 py-3 bg-slate-100 text-slate-900 rounded-xl font-black text-sm hover:bg-slate-200">
+          <i data-lucide="download" class="w-4 h-4"></i> EXPORTAR .ZIP
+        </button>
+        <button onclick="saveToDatabase()" id="btn-save-db"
+          class="flex items-center gap-2 px-8 py-3 bg-green-700 text-white rounded-xl font-black text-sm shadow-lg shadow-green-100 hover:bg-green-800">
+          <i data-lucide="database" class="w-4 h-4"></i> SALVAR NO BANCO
+        </button>
+      </div>
+    </div>
+  </div>
+  <!-- Cropper Modal -->
+  <div id="cropper-modal">
+    <div class="cropper-container-inner space-y-4">
+      <div class="flex items-center justify-between border-b pb-4">
+        <h3 class="font-black text-slate-900">Ajustar Recorte</h3>
+        <button onclick="closeCropper()" class="p-2 hover:bg-slate-100 rounded-full text-slate-400">
+          <i data-lucide="x" class="w-6 h-6"></i>
+        </button>
+      </div>
+      <div class="img-container">
+        <img id="cropper-image" src="" alt="Crop Preview">
+      </div>
+      <div class="flex justify-end gap-3 pt-4">
+        <button onclick="closeCropper()" class="px-6 py-2 text-slate-500 font-bold">CANCELAR</button>
+        <button onclick="applyCrop()" class="px-8 py-2 bg-green-700 text-white font-black rounded-lg">SALVAR
+          RECORTE</button>
+      </div>
+    </div>
+  </div>
+  <script src="{% static 'parser/js/parser.js' %}"></script>
 </body>
 
 </html>

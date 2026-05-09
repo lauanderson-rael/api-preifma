@@ -26,12 +26,14 @@ def process(request: HttpRequest):
               api_key_override (opcional — quando a chave não está no servidor)
     Devolve:  JSON { "html": "..." } ou { "error": "..." }
     """
-    # Chave: prioridade → override do form → settings
-    api_key = request.POST.get("api_key_override", "").strip() or settings.GEMINI_API_KEY
+    # Chave: prioridade → override do form → OpenRouter → Gemini
+    api_key = (request.POST.get("api_key_override", "").strip() or 
+               settings.OPENROUTER_API_KEY or 
+               settings.GEMINI_API_KEY)
 
     if not api_key:
         return JsonResponse(
-            {"error": "GEMINI_API_KEY não configurada. Cole sua chave no campo indicado."},
+            {"error": "Nenhuma chave de API configurada (Gemini ou OpenRouter)."},
             status=500,
         )
 

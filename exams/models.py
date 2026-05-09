@@ -3,7 +3,7 @@ from django.db import models
 class Attachment(models.Model):
     """Biblioteca unificada de mídias (Texto ou Imagem) para reaproveitamento."""
     TYPE_CHOICES = [
-        ('text', 'Texto de Apoio'),
+        ('text', 'Texto de Apoio'), 
         ('image', 'Imagem'),
     ]
     type = models.CharField(max_length=10, choices=TYPE_CHOICES)
