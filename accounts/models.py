@@ -28,6 +28,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     xp = models.IntegerField(default=0)
     streak = models.IntegerField(default=0)
     last_study_date = models.DateField(null=True, blank=True)
+    ai_daily_limit = models.PositiveIntegerField(default=3, help_text="Limite de explicações por IA por dia")
     
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)

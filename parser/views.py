@@ -60,21 +60,14 @@ def process(request: HttpRequest):
 @require_http_methods(["POST"])
 def save_to_db_view(request: HttpRequest):
     """
-    Recebe os dados da prova (HTML ou JSON) via POST e salva no banco de dados.
+    Recebe os dados estruturados da prova (JSON) via POST e salva no banco de dados.
     """
-    import json
     try:
         data = json.loads(request.body)
         
-        # Tenta extrair do campo 'html' (formato legado do Gemini) 
-        # ou usa o objeto inteiro (formato JSON estruturado)
-        payload = data.get("html", data)
-        year = data.get("ano")
-        
-        if not payload:
+        if not data:
             return JsonResponse({"error": "Nenhum conteúdo recebido para salvar."}, status=400)
-
-        result = save_exam_to_db(payload, default_year=int(year) if year else None)
+        result = save_exam_to_db(data)
         
         if "error" in result:
             return JsonResponse(result, status=400)
