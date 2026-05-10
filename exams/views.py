@@ -47,28 +47,58 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = QuestionSerializer
 
     def get_queryset(self):
-        return Question.objects.prefetch_related(
+        qs = Question.objects.prefetch_related(
             'alternatives',
             'questionattachment_set__attachment',
         ).all()
+        
+        # Filtros via Query Params
+        subject = self.request.query_params.get('subject')
+        exam_type = self.request.query_params.get('exam_type')
+        
+        if subject:
+            qs = qs.filter(subject__in=subject.split(','))
+        if exam_type:
+            qs = qs.filter(exam__type__in=exam_type.split(','))
+            
+        return qs
 
     @action(detail=False, methods=['get'], url_path='random')
     def random(self, request):
-        subject = request.query_params.get('subject')
-        exam_type = request.query_params.get('exam_type')
         count = int(request.query_params.get('count', 10))
-
         qs = self.get_queryset()
-        if subject:
-            qs = qs.filter(subject=subject)
-        if exam_type:
-            qs = qs.filter(exam__type=exam_type)
-
+        
         ids = list(qs.values_list('id', flat=True))
         if not ids:
             return Response([], status=status.HTTP_200_OK)
 
         sampled = _random.sample(ids, min(count, len(ids)))
-        questions = qs.filter(id__in=sampled)
+        questions = self.get_queryset().filter(id__in=sampled)
         serializer = self.get_serializer(questions, many=True)
-        return Response(serializer.data)
+        return Response({
+            "total": questions.count(),
+            "results": serializer.data
+        })
+
+    @action(detail=False, methods=['get'], url_path='simulated')
+    def simulated(self, request):
+        exam_type = request.query_params.get('exam_type', 'integrado')
+        
+        # Busca 15 de cada matéria baseado no tipo de prova
+        qs = self.get_queryset().filter(exam__type__in=exam_type.split(','))
+        
+        port_ids = list(qs.filter(subject='portugues').values_list('id', flat=True))
+        mat_ids = list(qs.filter(subject='matematica').values_list('id', flat=True))
+        
+        sampled_port = _random.sample(port_ids, min(15, len(port_ids)))
+        sampled_mat = _random.sample(mat_ids, min(15, len(mat_ids)))
+        
+        final_ids = sampled_port + sampled_mat
+        _random.shuffle(final_ids) # Mistura a ordem (Port e Mat intercalados)
+        
+        questions = self.get_queryset().filter(id__in=final_ids)
+        serializer = self.get_serializer(questions, many=True)
+        return Response({
+            "total": questions.count(),
+            "results": serializer.data
+        })

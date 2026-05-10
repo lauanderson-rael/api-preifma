@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
     StudySession, Answer, SubjectProgress,
-    Mission, UserMission, Achievement, UserAchievement
+    Mission, UserMission
 )
 
 
@@ -25,5 +25,3 @@ class SubjectProgressAdmin(admin.ModelAdmin):
 
 admin.site.register(Mission)
 admin.site.register(UserMission)
-admin.site.register(Achievement)
-admin.site.register(UserAchievement)

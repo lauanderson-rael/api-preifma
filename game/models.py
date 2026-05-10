@@ -86,6 +86,12 @@ class Mission(models.Model):
     xp_reward = models.PositiveIntegerField()
     goal_type = models.CharField(max_length=50)
     goal_value = models.PositiveIntegerField()
+    special_reward = models.CharField(
+        max_length=50, 
+        blank=True, 
+        null=True, 
+        help_text="Ex: 'AI_LIMIT' para aumentar limite diário de IA"
+    )
 
 
 class UserMission(models.Model):
@@ -100,14 +106,14 @@ class UserMission(models.Model):
         unique_together = ('user', 'mission', 'date')
 
 
-class Achievement(models.Model):
-    title = models.CharField(max_length=200)
-    description = models.TextField()
-    icon = models.ImageField(upload_to='achievements/')
-    xp_reward = models.PositiveIntegerField()
+class UserAIDailyUsage(models.Model):
+    """Controle de uso diário de explicações por IA."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='ai_usage')
+    date = models.DateField(auto_now_add=True)
+    count = models.PositiveIntegerField(default=0)
+    bonus_limit = models.PositiveIntegerField(default=0, help_text="Bônus extra de cota ganho em missões hoje")
 
-
-class UserAchievement(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE)
-    unlocked_at = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        unique_together = ('user', 'date')
+        verbose_name = 'Uso Diário de IA'
+        verbose_name_plural = 'Usos Diários de IA'

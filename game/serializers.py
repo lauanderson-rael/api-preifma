@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import (
     StudySession, Answer, SubjectProgress,
-    Mission, UserMission, Achievement, UserAchievement,
+    Mission, UserMission,
 )
 from exams.serializers import QuestionSerializer
 
@@ -99,16 +99,4 @@ class UserMissionSerializer(serializers.ModelSerializer):
         fields = ['id', 'mission', 'progress', 'completed', 'xp_claimed', 'date']
 
 
-#  Achievements
-class AchievementSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Achievement
-        fields = ['id', 'title', 'description', 'icon', 'xp_reward']
-
-
-class UserAchievementSerializer(serializers.ModelSerializer):
-    achievement = AchievementSerializer(read_only=True)
-
-    class Meta:
-        model = UserAchievement
-        fields = ['id', 'achievement', 'unlocked_at']
+        fields = ['id', 'mission', 'progress', 'completed', 'xp_claimed', 'date']

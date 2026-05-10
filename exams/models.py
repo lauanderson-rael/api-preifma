@@ -92,3 +92,17 @@ class Alternative(models.Model):
         ]
         verbose_name = 'Alternativa'
         verbose_name_plural = 'Alternativas'
+
+
+class QuestionExplanation(models.Model):
+    """Cache de explicações geradas pela IA para uma questão."""
+    question = models.OneToOneField(Question, on_delete=models.CASCADE, related_name='explanation')
+    content = models.TextField(help_text="Texto da explicação gerado pela IA")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Explicação Q{self.question.number} ({self.question.exam.name})"
+
+    class Meta:
+        verbose_name = 'Explicação de Questão'
+        verbose_name_plural = 'Explicações de Questões'

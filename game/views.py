@@ -8,11 +8,11 @@ from rest_framework.views import APIView
 
 from exams.models import Alternative, Question
 from .models import (
-    Achievement, Answer, Mission, StudySession,
-    SubjectProgress, UserAchievement, UserMission,
+    Answer, Mission, StudySession,
+    SubjectProgress, UserMission, UserAIDailyUsage
 )
+from datetime import date
 from .serializers import (
-    AchievementSerializer,
     AnswerCreateSerializer,
     AnswerSerializer,
     SessionFinishSerializer,
@@ -20,7 +20,6 @@ from .serializers import (
     StudySessionListSerializer,
     StudySessionSerializer,
     SubjectProgressSerializer,
-    UserAchievementSerializer,
     UserMissionSerializer,
 )
 from .services import update_streak, xp_per_correct
@@ -125,12 +124,6 @@ class SessionFinishView(APIView):
         with transaction.atomic():
             answers = session.answers.all()
             
-            if answers.filter(Q(correct_letter='') | Q(correct_letter__isnull=True)).exists():
-                return Response(
-                    {'detail': 'Inconsistência detectada: Algumas respostas estão sem o gabarito registrado.'},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
             total_duration = answers.aggregate(Sum('response_time'))['response_time__sum'] or 0
 
             correct_count = answers.filter(is_correct=True).count()
@@ -182,39 +175,17 @@ class SessionFinishView(APIView):
                     'completed': um.completed,
                 })
 
-            # ── Achievements (básico: Primeira Vitória) ──────────────────────
-            achievements_unlocked = []
-            already_unlocked_ids = UserAchievement.objects.filter(
-                user=user
-            ).values_list('achievement_id', flat=True)
-            candidates = Achievement.objects.exclude(id__in=already_unlocked_ids)
-            for achievement in candidates:
-                unlock = False
-                # Regras simples baseadas em title/goal_type podem ser expandidas
-                if 'Primeira' in achievement.title and correct_count > 0:
-                    unlock = True
-                if unlock:
-                    ua = UserAchievement.objects.create(user=user, achievement=achievement)
-                    user.xp += achievement.xp_reward
-                    user.save(update_fields=['xp'])
-                    achievements_unlocked.append({
-                        'id': achievement.id,
-                        'title': achievement.title,
-                        'icon': achievement.icon.url if achievement.icon else None,
-                    })
-
-        return Response({
-            'session_id': session.id,
-            'total_questions': total,
-            'correct_answers': correct_count,
-            'accuracy': accuracy,
-            'duration_seconds': session.duration_seconds,
-            'xp_gained': xp_gained,
-            'new_total_xp': user.xp,
-            'streak': new_streak,
-            'missions_updated': missions_updated,
-            'achievements_unlocked': achievements_unlocked,
-        })
+            return Response({
+                'session_id': session.id,
+                'total_questions': total,
+                'correct_answers': correct_count,
+                'accuracy': accuracy,
+                'duration_seconds': session.duration_seconds,
+                'xp_gained': xp_gained,
+                'new_total_xp': user.xp,
+                'streak': new_streak,
+                'missions_updated': missions_updated,
+            })
 
 
 class SessionHistoryView(generics.ListAPIView):
@@ -285,29 +256,28 @@ class MissionClaimView(APIView):
 
         xp = um.mission.xp_reward
         request.user.xp += xp
+        
+        # Lógica de Recompensa Especial (Bônus de IA temporário)
+        bonus_msg = ""
+        if um.mission.special_reward == "AI_LIMIT":
+            from .models import UserAIDailyUsage
+            usage_today, _ = UserAIDailyUsage.objects.get_or_create(
+                user=request.user, 
+                date=um.date
+            )
+            usage_today.bonus_limit += 2
+            usage_today.save()
+            bonus_msg = " Seu limite de HOJE aumentou em +2!"
+
         request.user.save(update_fields=['xp'])
         um.xp_claimed = True
         um.save(update_fields=['xp_claimed'])
-        return Response({'xp_gained': xp, 'new_total_xp': request.user.xp})
-
-
-# Achievements
-class AchievementListView(generics.ListAPIView):
-    """GET /api/achievements/ — todas as conquistas do sistema."""
-    permission_classes = [IsAuthenticated]
-    serializer_class = AchievementSerializer
-    queryset = Achievement.objects.all()
-
-
-class UserAchievementListView(generics.ListAPIView):
-    """GET /api/achievements/user/ — conquistas desbloqueadas pelo usuário."""
-    permission_classes = [IsAuthenticated]
-    serializer_class = UserAchievementSerializer
-
-    def get_queryset(self):
-        return UserAchievement.objects.filter(
-            user=self.request.user
-        ).select_related('achievement').order_by('-unlocked_at')
+        
+        return Response({
+            'xp_gained': xp, 
+            'new_total_xp': request.user.xp,
+            'detail': f"Missão concluída!{bonus_msg}"
+        })
 
 
 # Dashboard
@@ -320,16 +290,36 @@ class DashboardView(APIView):
         today = date.today()
         user = request.user
 
-       
-        all_missions = Mission.objects.all()
-        for mission in all_missions:
-            UserMission.objects.get_or_create(
-                user=user, mission=mission, date=today,
-                defaults={'progress': 0, 'completed': False},
-            )
+        # Garante que existam 5 missões aleatórias para hoje
+        from datetime import date
+        import random as _random_missions
+        today = date.today()
+        
+        user_daily_missions = UserMission.objects.filter(user=user, date=today)
+        
+        if not user_daily_missions.exists():
+            all_available_missions = list(Mission.objects.all())
+            if all_available_missions:
+                # Sorteia até 5 missões
+                selected_missions = _random_missions.sample(
+                    all_available_missions, 
+                    min(5, len(all_available_missions))
+                )
+                for mission in selected_missions:
+                    UserMission.objects.create(
+                        user=user,
+                        mission=mission,
+                        date=today,
+                        progress=0,
+                        completed=False
+                    )
+        
         daily_missions = UserMission.objects.filter(
             user=user, date=today
         ).select_related('mission')
+        
+        # Se por algum motivo as missões de hoje sumirem da query acima (ex: erro no cache), 
+        # garantimos a recuperação.
 
        
         recent_sessions = StudySession.objects.filter(
@@ -338,6 +328,10 @@ class DashboardView(APIView):
 
        
         subject_progress = SubjectProgress.objects.filter(user=user)
+        # Informações de cota de IA
+        today = date.today()
+        ai_usage_obj, _ = UserAIDailyUsage.objects.get_or_create(user=user, date=today)
+
         return Response({
             'streak': user.streak,
             'xp': user.xp,
@@ -345,4 +339,21 @@ class DashboardView(APIView):
             'daily_missions': UserMissionSerializer(daily_missions, many=True).data,
             'recent_sessions': StudySessionListSerializer(recent_sessions, many=True).data,
             'subject_progress': SubjectProgressSerializer(subject_progress, many=True).data,
+            'ai_usage': {
+                'used': ai_usage_obj.count,
+                'limit': user.ai_daily_limit + ai_usage_obj.bonus_limit,
+                'remaining': max(0, (user.ai_daily_limit + ai_usage_obj.bonus_limit) - ai_usage_obj.count)
+            }
         })
+
+
+class QuestionExplanationView(APIView):
+    """GET /api/game/questions/{question_id}/explain/ — obtém explicação por IA."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, question_id):
+        from .services import get_or_generate_explanation
+        result = get_or_generate_explanation(request.user, question_id)
+        if "error" in result:
+            return Response(result, status=status.HTTP_400_BAD_REQUEST)
+        return Response(result, status=status.HTTP_200_OK)

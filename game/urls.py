@@ -8,9 +8,8 @@ from .views import (
     SubjectProgressView,
     DailyMissionsView,
     MissionClaimView,
-    AchievementListView,
-    UserAchievementListView,
     DashboardView,
+    QuestionExplanationView,
 )
 
 urlpatterns = [
@@ -25,8 +24,7 @@ urlpatterns = [
     path('missions/daily/', DailyMissionsView.as_view(), name='missions-daily'),
     path('missions/<int:pk>/claim/', MissionClaimView.as_view(), name='mission-claim'),
    
-    path('achievements/', AchievementListView.as_view(), name='achievements'),
-    path('achievements/user/', UserAchievementListView.as_view(), name='user-achievements'),
 
     path('dashboard/', DashboardView.as_view(), name='dashboard'),
+    path('questions/<int:question_id>/explain/', QuestionExplanationView.as_view(), name='question-explain'),
 ]

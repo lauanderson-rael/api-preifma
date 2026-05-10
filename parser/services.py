@@ -9,10 +9,7 @@ from django.conf import settings
 from google import genai
 from PIL import Image
 
-# ─────────────────────────────────────────────────────────────────────────────
-# 1. PDF Processing & Gemini Integration
-# ─────────────────────────────────────────────────────────────────────────────
-
+# 1. Processamento de PDFs e integração com Gemini 
 class PageData:
     def __init__(self, text: str, image_b64: str, width: int, height: int):
         self.text = text
@@ -120,7 +117,6 @@ REQUISITO DE ARQUIVOS:
 Retorne APENAS o JSON puro, sem markdown (sem ```json), sem explicações adicionais.
 """
 
-
 def _call_openrouter(prompt: str, pages: list[PageData], api_key: str) -> str:
     """Chamada para o OpenRouter (estilo OpenAI)"""
     url = "https://openrouter.ai/api/v1/chat/completions"
@@ -227,7 +223,66 @@ def run_pipeline(exam_bytes: bytes, answer_key_bytes: Optional[bytes] = None, ap
     # Agora retorna um DICT (JSON estruturado)
     exam_json = transform_exam_to_json(pages, ak_text, api_key)
     
-    if "error" in exam_json:
-        return exam_json
-
     return process_visual_captures_in_json(exam_json, pages)
+
+
+def generate_question_explanation(question_text: str, alternatives: list, correct_letter: str, api_key: str, images_b64: list = None) -> str:
+    """Usa a IA para gerar uma explicação didática para a questão, incluindo imagens se houver."""
+    import json
+    from PIL import Image
+    import io
+    import base64
+    is_openrouter = api_key.startswith('sk-or-') or getattr(settings, 'OPENROUTER_API_KEY', '') == api_key
+    
+    prompt = f"""
+    Explique de forma didática e curta por que a alternativa {correct_letter} é a correta para esta questão.
+    
+    QUESTÃO:
+    {question_text}
+    
+    ALTERNATIVAS:
+    {json.dumps(alternatives, ensure_ascii=False)}
+    
+    Regras:
+    1. Seja direto e use linguagem simples para estudantes de ensino fundamental/médio.
+    2. Use formatação Markdown (negrito para fórmulas e valores, listas para as alternativas incorretas).
+    3. Comece explicando o conceito e depois mostre por que as outras estão erradas (se necessário).
+    4. Retorne apenas o texto da explicação, sem saudações ou introduções.
+    """
+
+    if is_openrouter:
+        url = "https://openrouter.ai/api/v1/chat/completions"
+        headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+        
+        content_list = [{"type": "text", "text": prompt}]
+        if images_b64:
+            for img in images_b64:
+                content_list.append({
+                    "type": "image_url",
+                    "image_url": {"url": f"data:image/jpeg;base64,{img}"}
+                })
+
+        payload = {
+            "model": getattr(settings, "OPENROUTER_MODEL", "google/gemini-2.0-flash-001"),
+            "messages": [{"role": "user", "content": content_list}],
+            "temperature": 0.3,
+            "max_tokens": 300  
+        }
+        res = requests.post(url, headers=headers, json=payload, timeout=60)
+        return res.json()["choices"][0]["message"]["content"]
+    else:
+        client = genai.Client(api_key=api_key)
+        
+        contents = [prompt]
+        if images_b64:
+            for img in images_b64:
+                # Converte base64 para PIL Image para o SDK do Gemini
+                img_data = base64.b64decode(img)
+                contents.append(Image.open(io.BytesIO(img_data)))
+
+        response = client.models.generate_content(
+            model="gemini-2.0-flash", 
+            contents=contents,
+            config={"max_output_tokens": 500}
+        )
+        return response.text or "Não foi possível gerar a explicação."
