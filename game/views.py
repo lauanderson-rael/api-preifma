@@ -21,16 +21,20 @@ from .serializers import (
     StudySessionSerializer,
     SubjectProgressSerializer,
     UserMissionSerializer,
+    DashboardSerializer,
 )
 from .services import update_streak, xp_per_correct
+from drf_spectacular.utils import extend_schema, extend_schema_view
 
 # Sessions
 
 class SessionStartView(APIView):
-    """POST /api/sessions/start/ — cria uma nova sessão."""
     permission_classes = [IsAuthenticated]
+    serializer_class = SessionStartSerializer
 
-    def post(self, request):
+    @extend_schema(summary="Iniciar nova sessão")
+    def post(self, request): 
+        """POST /api/sessions/start/ — cria uma nova sessão de estudo."""
         serializer = SessionStartSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
@@ -44,10 +48,11 @@ class SessionStartView(APIView):
 
 
 class SessionDetailView(APIView):
-    """GET /api/sessions/{id}/ — detalhe da sessão."""
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(summary="Detalhes da sessão")
     def get(self, request, pk):
+        """GET /api/sessions/{id}/ — retorna detalhes e estatísticas de uma sessão específica."""
         session = get_object_or_404(
             StudySession.objects.prefetch_related('answers'),
             pk=pk,
@@ -57,18 +62,19 @@ class SessionDetailView(APIView):
 
 
 class SessionAnswerView(APIView):
-    """
-    POST /api/sessions/{id}/answers/ — registra resposta
-    GET  /api/sessions/{id}/answers/ — lista respostas
-    """
     permission_classes = [IsAuthenticated]
+    serializer_class = AnswerCreateSerializer
 
+    @extend_schema(summary="Listar respostas da sessão")
     def get(self, request, pk):
+        """GET /api/sessions/{id}/answers/ — Lista todas as respostas dadas nesta sessão."""
         session = get_object_or_404(StudySession, pk=pk, user=request.user)
         answers = session.answers.select_related('question', 'selected_alternative').all()
         return Response(AnswerSerializer(answers, many=True).data)
 
+    @extend_schema(summary="Registrar resposta")
     def post(self, request, pk):
+        """POST /api/sessions/{id}/answers/ — Registra a resposta do aluno para uma questão."""
         session = get_object_or_404(StudySession, pk=pk, user=request.user)
         if session.finished:
             return Response(
@@ -99,7 +105,7 @@ class SessionAnswerView(APIView):
             is_correct=is_correct,
             response_time=data['response_time'],
         )
-
+ 
         return Response({
             'is_correct': is_correct,
             'correct_letter': correct_letter,
@@ -108,10 +114,12 @@ class SessionAnswerView(APIView):
 
 
 class SessionFinishView(APIView):
-    """POST /api/sessions/{id}/finish/ — finaliza sessão e calcula resultado."""
     permission_classes = [IsAuthenticated]
+    serializer_class = SessionFinishSerializer
 
+    @extend_schema(summary="Finalizar sessão")
     def post(self, request, pk):
+        """POST /api/sessions/{id}/finish/ — finaliza sessão, calcula XP e atualiza progresso."""
         session = get_object_or_404(StudySession, pk=pk, user=request.user)
         if session.finished:
             return Response(
@@ -188,8 +196,9 @@ class SessionFinishView(APIView):
             })
 
 
+
+@extend_schema(summary="Histórico de sessões", description="GET /api/sessions/history/ — histórico de sessões do usuário.")  
 class SessionHistoryView(generics.ListAPIView):
-    """GET /api/sessions/history/ — histórico de sessões do usuário."""
     permission_classes = [IsAuthenticated]
     serializer_class = StudySessionListSerializer
 
@@ -200,21 +209,22 @@ class SessionHistoryView(generics.ListAPIView):
 
 
 # Progress
+@extend_schema(summary="Progresso por matéria", description="GET /api/progress/subjects/ — progresso por matéria.")
 class SubjectProgressView(generics.ListAPIView):
-    """GET /api/progress/subjects/ — progresso por matéria."""
     permission_classes = [IsAuthenticated]
     serializer_class = SubjectProgressSerializer
 
-    def get_queryset(self):
-        return SubjectProgress.objects.filter(user=self.request.user)
+    def get_queryset(self): 
+        return SubjectProgress.objects.filter(user=self.request.user) 
 
 
 # Missions
 class DailyMissionsView(APIView):
-    """GET /api/missions/daily/ — missões do dia com progresso."""
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(summary="Listar missões diárias")
     def get(self, request):
+        """GET /api/missions/daily/ — missões do dia com progresso."""
         from datetime import date
         today = date.today()
         user = request.user
@@ -234,10 +244,11 @@ class DailyMissionsView(APIView):
 
 
 class MissionClaimView(APIView):
-    """POST /api/missions/{id}/claim/ — reivindica XP de missão completada (idempotente)."""
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(summary="Reivindicar XP de missão")
     def post(self, request, pk):
+        """POST /api/missions/{id}/claim/ — reivindica XP de missão completada (idempotente)."""
         user = request.user
         
         # Busca o registro da missão diária pelo ID (o frontend envia o ID do UserMission)
@@ -282,10 +293,12 @@ class MissionClaimView(APIView):
 
 # Dashboard
 class DashboardView(APIView):
-    """GET /api/dashboard/ — dados agregados para a tela inicial."""
     permission_classes = [IsAuthenticated]
+    serializer_class = DashboardSerializer
 
+    @extend_schema(summary="Dashboard inicial")
     def get(self, request):
+        """GET /api/dashboard/ — dados agregados para a tela inicial."""
         from datetime import date
         today = date.today()
         user = request.user
@@ -316,11 +329,7 @@ class DashboardView(APIView):
         
         daily_missions = UserMission.objects.filter(
             user=user, date=today
-        ).select_related('mission')
-        
-        # Se por algum motivo as missões de hoje sumirem da query acima (ex: erro no cache), 
-        # garantimos a recuperação.
-
+        ).select_related('mission') 
        
         recent_sessions = StudySession.objects.filter(
             user=user, finished=True
@@ -348,10 +357,11 @@ class DashboardView(APIView):
 
 
 class QuestionExplanationView(APIView):
-    """GET /api/game/questions/{question_id}/explain/ — obtém explicação por IA."""
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(summary="Explicação por IA")
     def get(self, request, question_id):
+        """GET /api/game/questions/{question_id}/explain/ — obtém explicação detalhada via IA."""
         from .services import get_or_generate_explanation
         result = get_or_generate_explanation(request.user, question_id)
         if "error" in result:

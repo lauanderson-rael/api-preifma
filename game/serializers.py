@@ -99,4 +99,16 @@ class UserMissionSerializer(serializers.ModelSerializer):
         fields = ['id', 'mission', 'progress', 'completed', 'xp_claimed', 'date']
 
 
-        fields = ['id', 'mission', 'progress', 'completed', 'xp_claimed', 'date']
+class DashboardSerializer(serializers.Serializer):
+    """Exibe os parâmetros na documentação do Dashboard."""
+    streak = serializers.IntegerField(read_only=True)
+    xp = serializers.IntegerField(read_only=True)
+
+
+class AnswerResponseSerializer(serializers.Serializer):
+    is_correct = serializers.BooleanField(read_only=True)
+    correct_letter = serializers.CharField(read_only=True)
+
+
+class SessionFinishResponseSerializer(serializers.Serializer):
+    session_id = serializers.IntegerField(read_only=True)

@@ -1,8 +1,6 @@
 from pathlib import Path
 import os
 from dotenv import load_dotenv
-
-# Carrega variáveis do arquivo .env
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -14,6 +12,7 @@ ALLOWED_HOSTS = ['*']
 AUTH_USER_MODEL = 'accounts.User'
 
 INSTALLED_APPS = [
+   # 'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -25,6 +24,7 @@ INSTALLED_APPS = [
     'parser',
     'game',
     'rest_framework',
+    'drf_spectacular',
 ]
 
 REST_FRAMEWORK = {
@@ -36,6 +36,14 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'PRÉ-IFMA API',
+    'DESCRIPTION': 'Documentação dos endpoints da plataforma educacional PRÉ-IFMA.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
 }
 
 from datetime import timedelta
@@ -103,3 +111,25 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800
 GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
 OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY', '')
 OPENROUTER_MODEL = os.environ.get('OPENROUTER_MODEL', 'google/gemini-2.0-flash-001')
+
+# JAZZMIN_SETTINGS = {
+#     "site_title": "PRE-IFMA Admin",
+#     "site_brand": "PRE-IFMA Admin",
+#     "welcome_sign": "Painel Administrativo", 
+#     "copyright": "Lauanderson Rael",  
+    
+#     "custom_links": {
+#         "parser": [{
+#             "name": "Abrir Parser IA", 
+#             "url": "/parser/", 
+#             "icon": "fas fa-robot",
+#             "permissions": ["auth.view_user"]
+#         }],
+#     },
+    
+#     "topmenu_links": [
+#         {"name": "Home",  "url": "admin:index", "permissions": ["auth.view_user"]},
+#         {"name": "Abrir Parser", "url": "/parser/", "new_window": True},
+#     ],
+# }
+

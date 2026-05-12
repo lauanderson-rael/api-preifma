@@ -5,17 +5,17 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import extend_schema, extend_schema_view
 
 from .models import Exam, Question
 from .serializers import ExamSerializer, ExamDetailSerializer, QuestionSerializer
 
 
+@extend_schema_view(
+    list=extend_schema(summary="Listar provas"),
+    retrieve=extend_schema(summary="Detalhes da prova"),
+)
 class ExamViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    GET /api/exams/         → lista de provas
-    GET /api/exams/{id}/    → detalhe da prova
-    GET /api/exams/{id}/questions/ → questões da prova
-    """
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
@@ -25,9 +25,19 @@ class ExamViewSet(viewsets.ReadOnlyModelViewSet):
         if self.action == 'retrieve':
             return ExamDetailSerializer
         return ExamSerializer
+    
+    def list(self, request, *args, **kwargs):
+        """GET /api/exams/ — Lista todas as provas ordenadas por ano e nome."""
+        return super().list(request, *args, **kwargs)
 
+    def retrieve(self, request, *args, **kwargs):
+        """GET /api/exams/{id}/ — Detalhes de uma prova específica."""
+        return super().retrieve(request, *args, **kwargs) 
+
+    @extend_schema(summary="Questões da prova")
     @action(detail=True, methods=['get'], url_path='questions')
     def questions(self, request, pk=None):
+        """GET /api/exams/{id}/questions/ — Retorna todas as questões de uma prova específica."""
         exam = get_object_or_404(Exam, pk=pk)
         qs = (
             exam.questions
@@ -38,11 +48,11 @@ class ExamViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(serializer.data)
 
 
+@extend_schema_view(
+    list=extend_schema(summary="Listar questões"),
+    retrieve=extend_schema(summary="Detalhes da questão"),
+)
 class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    GET /api/questions/{id}/    → questão individual
-    GET /api/questions/random/  → questões aleatórias (subject, exam_type, count)
-    """
     permission_classes = [IsAuthenticated]
     serializer_class = QuestionSerializer
 
@@ -63,8 +73,18 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
             
         return qs
 
+    def list(self, request, *args, **kwargs):
+        """GET /api/questions/ — Lista todas as questões com suporte a filtros (subject, exam_type)."""
+        return super().list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        """GET /api/questions/{id}/ — Detalhes de uma questão específica (inclui alternativas)."""
+        return super().retrieve(request, *args, **kwargs)
+
+    @extend_schema(summary="Questões aleatórias")
     @action(detail=False, methods=['get'], url_path='random')
     def random(self, request):
+        """GET /api/questions/random/ — Retorna questões aleatórias baseadas em filtros."""
         count = int(request.query_params.get('count', 10))
         qs = self.get_queryset()
         
@@ -80,8 +100,10 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
             "results": serializer.data
         })
 
+    @extend_schema(summary="Gerar simulado")
     @action(detail=False, methods=['get'], url_path='simulated')
     def simulated(self, request):
+        """GET /api/questions/simulated/ — Gera um simulado balanceado (15 Port + 15 Mat)."""
         exam_type = request.query_params.get('exam_type', 'integrado')
         
         # Busca 15 de cada matéria baseado no tipo de prova

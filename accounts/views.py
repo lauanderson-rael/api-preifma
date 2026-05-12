@@ -7,20 +7,23 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenRefreshView
 
-from game.models import Answer, StudySession
-from .serializers import RegisterSerializer, UserSerializer
+from drf_spectacular.utils import extend_schema, extend_schema_view
+from game.models import Answer
+from .serializers import RegisterSerializer, UserSerializer, LoginSerializer
 from game.services import update_streak
 from .level_utils import level_progress
 
 User = get_user_model()
 
-
 class RegisterView(APIView):
-    """POST /api/auth/register/ — cria conta e retorna tokens JWT."""
     permission_classes = [AllowAny]
+    serializer_class = RegisterSerializer
 
+    @extend_schema(summary="Registrar novo usuário")
     def post(self, request):
+        """POST /api/auth/register/ — cria conta e retorna tokens JWT."""
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
@@ -34,12 +37,12 @@ class RegisterView(APIView):
 
 
 class LoginView(APIView):
-    """
-    POST /api/auth/login/ — autentica usuário, atualiza streak, retorna tokens.
-    """
     permission_classes = [AllowAny]
+    serializer_class = LoginSerializer
 
+    @extend_schema(summary="Login de usuário")
     def post(self, request):
+        """POST /api/auth/login/ — autentica usuário, atualiza streak, retorna tokens."""
         from django.contrib.auth import authenticate
         email = request.data.get('email')
         password = request.data.get('password')
@@ -50,8 +53,6 @@ class LoginView(APIView):
                 {'detail': 'E-mail ou senha inválidos.'},
                 status=status.HTTP_401_UNAUTHORIZED,
             )
-
-        # Atualiza streak ao fazer login
         update_streak(user)
 
         refresh = RefreshToken.for_user(user)
@@ -61,29 +62,35 @@ class LoginView(APIView):
             'refresh': str(refresh),
         })
 
+@extend_schema(summary="Refresh token")
+class CustomTokenRefreshView(TokenRefreshView):
+    """POST /api/auth/refresh/ — Recebe um refresh token e retorna um novo access token."""
+    pass
+
 
 class MeView(APIView):
-    """GET /api/auth/me/ — dados básicos do usuário logado."""
     permission_classes = [IsAuthenticated]
-
+    @extend_schema(summary="Dados do usuário logado")
     def get(self, request):
+        """GET /api/auth/me/ — dados básicos do usuário logado."""
         return Response(UserSerializer(request.user).data)
 
 
+@extend_schema_view(
+    get=extend_schema(summary="Exibir perfil completo"),
+    patch=extend_schema(summary="Atualizar nome/username"),
+)
 class ProfileView(generics.RetrieveUpdateAPIView):
-    """
-    GET   /api/users/profile/ → perfil completo
-    PATCH /api/users/profile/ → atualiza name, username
-    """
     permission_classes = [IsAuthenticated]
     serializer_class = UserSerializer
     http_method_names = ['get', 'patch', 'head', 'options']
 
-    def get_object(self):
-        return self.request.user
+    def get(self, request):
+        """GET /api/users/profile/ — perfil completo"""
+        return Response(UserSerializer(request.user).data)
 
-    def partial_update(self, request, *args, **kwargs):
-        # Só permite alterar name e username
+    def patch(self, request, *args, **kwargs):
+        """PATCH /api/users/profile/ — atualiza name, username"""
         allowed = {k: v for k, v in request.data.items() if k in ('name', 'username')}
         serializer = self.get_serializer(request.user, data=allowed, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -92,10 +99,10 @@ class ProfileView(generics.RetrieveUpdateAPIView):
 
 
 class StatsView(APIView):
-    """GET /api/users/stats/ — xp, nível (curva progressiva), streak, acurácia."""
     permission_classes = [IsAuthenticated]
-
+    @extend_schema(summary="Estatísticas de desempenho")
     def get(self, request):
+        """GET /api/users/stats/ — xp, nível (curva progressiva), streak, acurácia."""
         user = request.user
         total_answered = Answer.objects.filter(user=user).count()
         total_correct = Answer.objects.filter(user=user, is_correct=True).count()
@@ -118,11 +125,19 @@ class StatsView(APIView):
 
 
 class StreakView(APIView):
-    """GET /api/streak/ — streak atual e data do último estudo."""
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(summary="Ofensiva (Streak)")
     def get(self, request):
+        """GET /api/streak/ — retorna a contagem de streak atual e a data do último estudo."""
         return Response({
             'current_streak': request.user.streak,
             'last_study_date': request.user.last_study_date,
         })
+
+
+@extend_schema(summary="Renovar token de acesso")
+class CustomTokenRefreshView(TokenRefreshView):
+    """POST /api/auth/refresh/ — Recebe um refresh token e retorna um novo access token."""
+    pass
+

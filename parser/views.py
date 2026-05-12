@@ -11,14 +11,21 @@ import os
 
 from .services import run_pipeline
 from exams.services import save_exam_to_db
+from django.contrib.admin.views.decorators import staff_member_required
 
 
+def landing(request: HttpRequest):
+    return render(request, "landing.html")
+
+
+@staff_member_required(login_url='/admin/login/')
 def index(request: HttpRequest):
     return render(request, "parser/index.html", {
-        "has_api_key": bool(settings.GEMINI_API_KEY),
+        "has_api_key": bool(settings.GEMINI_API_KEY or settings.OPENROUTER_API_KEY),
     })
 
 
+@staff_member_required(login_url='/admin/login/')
 @csrf_exempt
 @require_http_methods(["POST"])
 def process(request: HttpRequest):
@@ -56,6 +63,7 @@ def process(request: HttpRequest):
         return JsonResponse({"error": str(exc)}, status=500)
 
 
+@staff_member_required(login_url='/admin/login/')
 @csrf_exempt
 @require_http_methods(["POST"])
 def save_to_db_view(request: HttpRequest):
@@ -79,6 +87,7 @@ def save_to_db_view(request: HttpRequest):
         return JsonResponse({"error": str(exc)}, status=500)
 
 
+@staff_member_required(login_url='/admin/login/')
 @csrf_exempt
 @require_http_methods(["POST"])
 def ingest_zip_view(request: HttpRequest):

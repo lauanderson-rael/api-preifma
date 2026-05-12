@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRÉ-IFMA | Plataforma Educacional de IA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .gradient-bg {
+            /* background: linear-gradient(135deg, #10b981 0%, #059669 100%); */
+            background-color: #198754;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 text-gray-900 leading-relaxed">
+
+    <!-- Hero Section -->
+    <header class="gradient-bg text-white pb-20 pt-24 px-6">
+        <div class="max-w-6xl mx-auto text-center">
+            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-4">PRÉ-IFMA</h1>
+            <p class="text-xl md:text-2xl font-semibold opacity-90 mb-6">
+                Plataforma Educacional Baseada em IA para Extração e Disponibilização de Questões do IFMA
+            </p>
+            <p class="max-w-3xl mx-auto text-lg opacity-80 mb-10">
+                O sistema utiliza Inteligência Artificial para estruturar questões automaticamente a partir de PDFs de
+                provas, permitindo revisão humana, armazenamento via API e consumo em aplicativo mobile gamificado.
+            </p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="/parser/"
+                    class="bg-white text-emerald-600 px-8 py-3 rounded-full font-bold text-lg hover:bg-gray-100 transition shadow-lg">Acessar
+                    Parser</a>
+                <a href="/admin/"
+                    class="bg-emerald-700 text-white px-8 py-3 rounded-full font-bold text-lg hover:bg-emerald-800 transition shadow-lg border border-emerald-500">Administração</a>
+                <a href="/api/docs/"
+                    class="bg-transparent border-2 border-white text-white px-8 py-3 rounded-full font-bold text-lg hover:bg-white hover:text-emerald-600 transition">Documentação
+                    API</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Content Sections -->
+    <main class="max-w-6xl mx-auto px-6 py-20 space-y-32">
+
+        <!-- Parser IA -->
+        <section class="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+                <span class="text-emerald-600 font-bold tracking-widest uppercase text-sm">Ferramenta Interna</span>
+                <h2 class="text-3xl font-bold mt-2 mb-4">Parser com Inteligência Artificial</h2>
+                <p class="text-gray-600 mb-6">
+                    Módulo especializado na digitalização de documentos históricos do IFMA. Transformamos PDFs brutos em
+                    dados JSON estruturados com precisão cirúrgica.
+                </p>
+                <ul class="space-y-3">
+                    <li class="flex items-center gap-3"><span
+                            class="bg-emerald-100 text-emerald-600 p-1 rounded-full"><svg class="w-4 h-4" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                    d="M5 13l4 4L19 7"></path>
+                            </svg></span> Upload de PDFs de provas e gabaritos</li>
+                    <li class="flex items-center gap-3"><span
+                            class="bg-emerald-100 text-emerald-600 p-1 rounded-full"><svg class="w-4 h-4" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                    d="M5 13l4 4L19 7"></path>
+                            </svg></span> Extração automática via Gemini 2.0 Flash</li>
+                    <li class="flex items-center gap-3"><span
+                            class="bg-emerald-100 text-emerald-600 p-1 rounded-full"><svg class="w-4 h-4" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                    d="M5 13l4 4L19 7"></path>
+                            </svg></span> Revisão humana com editor visual em tempo real</li>
+                    <li class="flex items-center gap-3"><span
+                            class="bg-emerald-100 text-emerald-600 p-1 rounded-full"><svg class="w-4 h-4" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                    d="M5 13l4 4L19 7"></path>
+                            </svg></span> Exportação em ZIP e inserção direta no Banco</li>
+                </ul>
+            </div>
+            <div
+                class="bg-gray-200 rounded-2xl h-64 shadow-inner flex items-center justify-center text-gray-400 font-medium border-2 border-dashed border-gray-300">
+                [ Screenshot do Parser ]
+            </div>
+        </section>
+
+        <!-- API REST -->
+        <section class="grid md:grid-cols-2 gap-12 items-center">
+            <div
+                class="order-2 md:order-1 bg-emerald-900 rounded-2xl h-64 shadow-2xl flex items-center justify-center text-emerald-300 font-mono p-6 text-sm overflow-hidden border-4 border-emerald-800">
+                <div>
+                    <p class="text-emerald-500">// GET /api/questions/</p>
+                    <p class="mt-2 text-white">{ "id": 1, "subject": "portugues", "statement": "..." }</p>
+                </div>
+            </div>
+            <div class="order-1 md:order-2">
+                <span class="text-emerald-600 font-bold tracking-widest uppercase text-sm">Infraestrutura</span>
+                <h2 class="text-3xl font-bold mt-2 mb-4">API REST Estruturada</h2>
+                <p class="text-gray-600 mb-6">
+                    Toda a base de dados do IFMA disponível de forma estruturada para integração com qualquer
+                    plataforma.
+                </p>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="p-4 bg-white rounded-xl shadow-sm border border-gray-100">
+                        <h4 class="font-bold text-emerald-600">Gamificação</h4>
+                        <p class="text-xs text-gray-500">Endpoints para XP e Níveis</p>
+                    </div>
+                    <div class="p-4 bg-white rounded-xl shadow-sm border border-gray-100">
+                        <h4 class="font-bold text-emerald-600">Segurança</h4>
+                        <p class="text-xs text-gray-500">Autenticação JWT Robusta</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- App Mobile -->
+        <section class="text-center max-w-4xl mx-auto">
+            <span class="text-emerald-600 font-bold tracking-widest uppercase text-sm">Para o Aluno</span>
+            <h2 class="text-3xl font-bold mt-2 mb-6">Aplicativo Mobile Gamificado</h2>
+            <p class="text-gray-600 mb-12">
+                Transformamos o estudo para o IFMA em uma jornada viciante e eficiente através de mecânicas de jogos.
+            </p>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="p-6 bg-white rounded-2xl shadow-sm hover:shadow-md transition">
+                    <div
+                        class="bg-emerald-100 w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-4 text-lg">
+                        ⚡</div>
+                    <h5 class="font-bold">Ofensivas</h5>
+                </div>
+                <div class="p-6 bg-white rounded-2xl shadow-sm hover:shadow-md transition">
+                    <div
+                        class="bg-emerald-100 w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-4 text-lg">
+                        🏆</div>
+                    <h5 class="font-bold">Níveis & XP</h5>
+                </div>
+                <div class="p-6 bg-white rounded-2xl shadow-sm hover:shadow-md transition">
+                    <div
+                        class="bg-emerald-100 w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-4 text-lg">
+                        🎯</div>
+                    <h5 class="font-bold">Missões</h5>
+                </div>
+                <div class="p-6 bg-white rounded-2xl shadow-sm hover:shadow-md transition">
+                    <div
+                        class="bg-emerald-100 w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-4 text-lg">
+                        🤖</div>
+                    <h5 class="font-bold">Tutor IA</h5>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tech Stack -->
+        <section class="bg-white rounded-3xl p-12 border border-gray-100 shadow-sm text-center">
+            <h3 class="text-2xl font-bold mb-8">Tecnologias que Movem o Projeto</h3>
+            <div class="flex flex-wrap justify-center gap-4">
+                <span
+                    class="px-4 py-2 bg-emerald-50 text-emerald-700 rounded-lg font-bold border border-emerald-100">Django</span>
+                <span
+                    class="px-4 py-2 bg-emerald-50 text-emerald-700 rounded-lg font-bold border border-emerald-100">DRF</span>
+                <span
+                    class="px-4 py-2 bg-emerald-50 text-emerald-700 rounded-lg font-bold border border-emerald-100">React
+                    Native</span>
+                <span
+                    class="px-4 py-2 bg-emerald-50 text-emerald-700 rounded-lg font-bold border border-emerald-100">TailwindCSS</span>
+                <span
+                    class="px-4 py-2 bg-emerald-50 text-emerald-700 rounded-lg font-bold border border-emerald-100">Gemini
+                    AI</span>
+                <span
+                    class="px-4 py-2 bg-emerald-50 text-emerald-700 rounded-lg font-bold border border-emerald-100">PostgreSQL</span>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-100 py-12 border-t border-gray-200">
+        <div class="max-w-6xl mx-auto px-6 text-center">
+            <p class="text-gray-500 font-bold">Projeto acadêmico desenvolvido para o IFMA</p>
+            <div class="mt-4 text-sm text-gray-400 font-medium">
+                &copy; 2026 pre-ifma. Todos os direitos reservados.
+            </div>
+        </div>
+    </footer>
+
+</body>
+
+</html>

@@ -4,13 +4,12 @@ from .level_utils import level_progress
 
 User = get_user_model()
 
-
 class UserSerializer(serializers.ModelSerializer):
     level = serializers.SerializerMethodField()
     xp_to_next_level = serializers.SerializerMethodField()
     progress_pct = serializers.SerializerMethodField()
 
-    def _lp(self, obj):
+    def _lp(self, obj): 
         # Cacheia no contexto do serializer para não recalcular 3x
         if not hasattr(obj, '_level_cache'):
             obj._level_cache = level_progress(obj.xp)
@@ -50,3 +49,8 @@ class RegisterSerializer(serializers.ModelSerializer):
             username=validated_data.get('username', None),
         )
         return user
+
+
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
