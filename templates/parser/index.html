@@ -13,8 +13,10 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
   <style>
     :root {
-      --primary: #15803d;
-      --primary-dark: #166534;
+      /* --primary: #15803d;
+      --primary-dark: #166534; */
+      --primary: #198754;
+      --primary-dark: #157045;
     }
 
     body {
@@ -131,10 +133,10 @@
 
 <body class="min-h-screen">
   <!-- Header -->
-  <header class="sticky top-0 z-40 w-full border-b bg-green-700 backdrop-blur-md">
+  <header class="sticky top-0 z-40 w-full border-b bg-[#198754] backdrop-blur-md">
     <div class="container mx-auto px-4 h-16 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <!-- <div class="bg-green-700 p-2 rounded-xl text-white shadow-lg shadow-green-200">
+        <!-- <div class="bg-[#198754] p-2 rounded-xl text-white shadow-lg shadow-green-200">
           <i data-lucide="file-text" class="w-6 h-6"></i>
         </div> -->
         <div>
@@ -211,10 +213,10 @@
         <div class="bg-amber-50 border border-amber-100 rounded-xl p-4 space-y-2">
           <div class="flex items-center gap-2 text-amber-800 font-bold text-sm">
             <i data-lucide="key" class="w-4 h-4"></i>
-            CHAVE GEMINI NECESSÁRIA
+            CHAVE DE API NECESSÁRIA
           </div>
-          <input type="password" id="api-key" placeholder="Insira sua GEMINI_API_KEY"
-            class="w-full bg-white border-amber-200 focus:ring-amber-500">
+          <input type="password" id="api-key" placeholder="Insira sua Gemini ou OpenRouter API Key"
+            class="w-full bg-white border-amber-200 focus:ring-amber-500 p-1">
         </div>
         {% endif %}
         <button id="btn-process"
@@ -332,11 +334,11 @@
           <section id="tab-attachments" class="tab-content hidden space-y-6">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <div class="w-1.5 h-6 bg-green-600 rounded-full"></div>
+                <div class="w-1.5 h-6 bg-[#198754] rounded-full"></div>
                 <h3 class="text-xl font-black text-slate-900">Anexos Globais</h3>
               </div>
               <button onclick="addAttachment()"
-                class="flex items-center gap-2 px-4 py-2 bg-green-700 text-white rounded-lg text-xs font-bold hover:bg-slate-800">
+                class="flex items-center gap-2 px-4 py-2 bg-[#198754] text-white rounded-lg text-xs font-bold hover:bg-slate-800">
                 <i data-lucide="plus" class="w-4 h-4"></i> ADICIONAR ANEXO
               </button>
             </div>
@@ -350,7 +352,7 @@
                 <h3 class="text-xl font-black text-slate-900">Questões</h3>
               </div>
               <button onclick="addQuestion()"
-                class="flex items-center gap-2 px-4 py-2 bg-green-700 text-white rounded-lg text-xs font-bold hover:bg-slate-800">
+                class="flex items-center gap-2 px-4 py-2 bg-[#198754] text-white rounded-lg text-xs font-bold hover:bg-slate-800">
                 <i data-lucide="plus" class="w-4 h-4"></i> ADICIONAR QUESTÃO
               </button>
             </div>
@@ -389,7 +391,7 @@
           <i data-lucide="download" class="w-4 h-4"></i> EXPORTAR .ZIP
         </button>
         <button onclick="saveToDatabase()" id="btn-save-db"
-          class="flex items-center gap-2 px-8 py-3 bg-green-700 text-white rounded-xl font-black text-sm shadow-lg shadow-green-100 hover:bg-green-800">
+          class="flex items-center gap-2 px-8 py-3 bg-[#198754] text-white rounded-xl font-black text-sm shadow-lg shadow-green-100 hover:bg-green-800">
           <i data-lucide="database" class="w-4 h-4"></i> SALVAR NO BANCO
         </button>
       </div>
@@ -409,7 +411,7 @@
       </div>
       <div class="flex justify-end gap-3 pt-4">
         <button onclick="closeCropper()" class="px-6 py-2 text-slate-500 font-bold">CANCELAR</button>
-        <button onclick="applyCrop()" class="px-8 py-2 bg-green-700 text-white font-black rounded-lg">SALVAR
+        <button onclick="applyCrop()" class="px-8 py-2 bg-[#198754] text-white font-black rounded-lg">SALVAR
           RECORTE</button>
       </div>
     </div>

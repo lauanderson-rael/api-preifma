@@ -56,7 +56,7 @@ async function startProcessing() {
 
   try {
     updateProcessingStatus('Iniciando análise...', 10);
-    const response = await fetch('/process/', {
+    const response = await fetch('/parser/process/', {
       method: 'POST',
       body: formData
     });
@@ -87,7 +87,7 @@ async function handleZipUpload(e) {
   formData.append('zip_file', file);
 
   try {
-    const response = await fetch('/ingest-zip/', {
+    const response = await fetch('/parser/ingest-zip/', {
       method: 'POST',
       body: formData
     });
@@ -115,7 +115,7 @@ async function saveToDatabase() {
   syncDataFromUI();
 
   try {
-    const response = await fetch('/save-to-db/', {
+    const response = await fetch('/parser/save-to-db/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(currentExamData)

@@ -41,7 +41,9 @@ DB_USER=preifma_user
 DB_PASSWORD=admin123
 DB_HOST=localhost
 DB_PORT=5432
+# uma das duas é opcional
 GEMINI_API_KEY=sua_chave_aqui
+OPENROUTER_API_KEY=sua_chave_aqui
 ```
 
 ### 5. Migrations e Execução
