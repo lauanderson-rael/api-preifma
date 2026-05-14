@@ -21,7 +21,7 @@ def landing(request: HttpRequest):
 @staff_member_required(login_url='/admin/login/')
 def index(request: HttpRequest):
     return render(request, "parser/index.html", {
-        "has_api_key": bool(settings.GEMINI_API_KEY or settings.OPENROUTER_API_KEY),
+        "has_api_key": bool(settings.OPENROUTER_API_KEY),
     })
 
 
@@ -34,10 +34,9 @@ def process(request: HttpRequest):
               api_key_override (opcional — quando a chave não está no servidor)
     Devolve:  JSON { "html": "..." } ou { "error": "..." }
     """
-    # Chave: prioridade → override do form → OpenRouter → Gemini
+    # Chave: prioridade → override do form → OpenRouter
     api_key = (request.POST.get("api_key_override", "").strip() or 
-               settings.OPENROUTER_API_KEY or 
-               settings.GEMINI_API_KEY)
+               settings.OPENROUTER_API_KEY)
 
     if not api_key:
         return JsonResponse(

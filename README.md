@@ -25,25 +25,27 @@ docker compose up -d db
 
 ### 3. Ambiente Virtual e Dependências
 ```bash
-# Crie e ative o venv
 python -m venv venv
-source venv/bin/activate  # Linux/macOS
+source venv/bin/activate  # Linux/macOS 
 
-# Instale as dependências
 pip install -r requirements.txt
 ```
 
 ### 4. Variáveis de Ambiente
 Crie um arquivo `.env` na raiz do projeto seguindo este modelo:
 ```ini
+# Banco de Dados
 DB_NAME=preifma_db
 DB_USER=preifma_user
 DB_PASSWORD=admin123
 DB_HOST=localhost
 DB_PORT=5432
-# uma das duas é opcional
-GEMINI_API_KEY=sua_chave_aqui
+
+# OpenRouter (IA) 
 OPENROUTER_API_KEY=sua_chave_aqui
+OPENROUTER_PARSER_MODEL=nome_do_modelo
+OPENROUTER_EXPLAINER_MODEL=nome_do_modelo 
+OPENROUTER_SITE_URL=url_do_seu_site 
 ```
 
 ### 5. Migrations e Execução
@@ -77,13 +79,23 @@ python manage.py runserver
 
 ---
 
-## 📤 Ingestão de Provas (Parser)
-O sistema possui ferramentas para transformar provas em dados estruturados.
+## 🛠️ Recursos Técnicos & Documentação
+O projeto oferece ferramentas de processamento inteligente e documentação técnica completa para desenvolvedores.
 
-### 1. Interface Web (IA)
-Acesse `http://localhost:8000/` para usar o Parser Inteligente.
+### 1. Parser de Provas (IA)
+Acesse `/parser/` (ex.: `http://localhost:8000/parser/`) para usar o Parser Inteligente.
 
-### 2. Ingestão via API (ZIP)
-*   **Endpoint:** `POST /ingest-zip/` 
-*   **Payload:** `multipart/form-data` (campo `zip_file`)
-*   **Requisito:** O ZIP deve conter `prova.json` e uma pasta `images/`.
+### 2. Documentação da API
+Para integração com clientes ou consulta técnica:  
+- **Swagger UI**: acesse `/api/docs/` (ex.: `http://localhost:8000/api/docs/`).
+- **Redoc**: acesse `/api/redoc/` para uma documentação mais estática.
+
+### 3. Arquitetura de IA (OpenRouter)
+O sistema utiliza uma camada de abstração para modelos de linguagem através da **OpenRouter**, permitindo trocar o provedor de IA via `.env` sem alteração de código:
+- **Parser**: Otimizado para modelos de raciocínio (ex: `google/gemini-3-flash-preview`).
+- **Explicações**: Otimizado para modelos didáticos e econômicos (ex: `google/gemini-2.0-flash-001`).
+
+--- 
+
+### 👨‍💻 Autor
+Desenvolvido por **Lauanderson Rael** como parte do Trabalho de Conclusão de Curso (TCC).

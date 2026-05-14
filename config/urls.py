@@ -9,7 +9,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, Spec
 
 # admin.site.site_header = "Nome do Painel (Cabeçalho)"
 # admin.site.site_title = "Nome do Site (Título da aba)"
-admin.site.index_title = "Pré-IFMA" 
+admin.site.index_title = "Pré-IFMA"  
 
 urlpatterns = [
     path('admin/', admin.site.urls),

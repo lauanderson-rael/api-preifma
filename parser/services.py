@@ -6,7 +6,7 @@ import requests
 import fitz        
 from typing import Optional, Union
 from django.conf import settings  
-from google import genai
+import requests
 from PIL import Image
 
 # 1. Processamento de PDFs e integração com Gemini 
@@ -123,8 +123,8 @@ def _call_openrouter(prompt: str, pages: list[PageData], api_key: str) -> str:
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
-        "HTTP-Referer": "http://localhost:8000", # Opcional
-        "X-OpenRouter-Title": "PRE-IFMA Parser"
+        "HTTP-Referer": getattr(settings, 'OPENROUTER_SITE_URL', 'http://localhost:8000'),
+        "X-OpenRouter-Title": "PRE-IFMA Parser"  
     }
     
     content = [
@@ -140,7 +140,7 @@ def _call_openrouter(prompt: str, pages: list[PageData], api_key: str) -> str:
         })
 
     payload = {
-        "model": getattr(settings, 'OPENROUTER_MODEL', 'google/gemini-2.0-flash-001'),
+        "model": getattr(settings, 'OPENROUTER_PARSER_MODEL', 'google/gemini-3-flash-preview'),
         "messages": [
             {"role": "system", "content": "Responda apenas com o JSON puro, sem blocos de código ou markdown."},
             {"role": "user", "content": content}
@@ -158,22 +158,10 @@ def _call_openrouter(prompt: str, pages: list[PageData], api_key: str) -> str:
 
 
 def transform_exam_to_json(pages: list[PageData], answer_key_text: Optional[str], api_key: str) -> dict:
-    is_openrouter = api_key.startswith('sk-or-') or getattr(settings, 'OPENROUTER_API_KEY', '') == api_key
-    
     full_text = "\n\n".join(f"--- PÁGINA {i + 1} ---\n{p.text}" for i, p in enumerate(pages))
     prompt_text = _PROMPT + f"\n\nGABARITO: {answer_key_text if answer_key_text else 'Não fornecido'}\n\nCONTEÚDO:\n{full_text}"
     
-    if is_openrouter:
-        raw_text = _call_openrouter(prompt_text, pages, api_key)
-    else:
-        # Gemini Direto
-        client = genai.Client(api_key=api_key)
-        parts = [prompt_text]
-        for p in pages:
-            parts.append({"inline_data": {"mime_type": "image/jpeg", "data": p.image_b64}})
-        
-        response = client.models.generate_content(model="gemini-2.0-flash", contents=parts)
-        raw_text = response.text or "{}"
+    raw_text = _call_openrouter(prompt_text, pages, api_key)
     
     # Limpeza básica caso o modelo ignore a instrução de "sem markdown"
     clean_json = re.sub(r'```json\s*|\s*```', '', raw_text).strip()
@@ -229,10 +217,6 @@ def run_pipeline(exam_bytes: bytes, answer_key_bytes: Optional[bytes] = None, ap
 def generate_question_explanation(question_text: str, alternatives: list, correct_letter: str, api_key: str, images_b64: list = None) -> str:
     """Usa a IA para gerar uma explicação didática para a questão, incluindo imagens se houver."""
     import json
-    from PIL import Image
-    import io
-    import base64
-    is_openrouter = api_key.startswith('sk-or-') or getattr(settings, 'OPENROUTER_API_KEY', '') == api_key
     
     prompt = f"""
     Explique de forma didática e curta por que a alternativa {correct_letter} é a correta para esta questão.
@@ -250,39 +234,28 @@ def generate_question_explanation(question_text: str, alternatives: list, correc
     4. Retorne apenas o texto da explicação, sem saudações ou introduções.
     """
 
-    if is_openrouter:
-        url = "https://openrouter.ai/api/v1/chat/completions"
-        headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
-        
-        content_list = [{"type": "text", "text": prompt}]
-        if images_b64:
-            for img in images_b64:
-                content_list.append({
-                    "type": "image_url",
-                    "image_url": {"url": f"data:image/jpeg;base64,{img}"}
-                })
+    url = "https://openrouter.ai/api/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+        "HTTP-Referer": getattr(settings, 'OPENROUTER_SITE_URL', 'http://localhost:8000'),
+        "X-OpenRouter-Title": "PRE-IFMA Explainer"
+    }
+    
+    content_list = [{"type": "text", "text": prompt}]
+    if images_b64:
+        for img in images_b64:
+            content_list.append({
+                "type": "image_url",
+                "image_url": {"url": f"data:image/jpeg;base64,{img}"}
+            })
 
-        payload = {
-            "model": getattr(settings, "OPENROUTER_MODEL", "google/gemini-2.0-flash-001"),
-            "messages": [{"role": "user", "content": content_list}],
-            "temperature": 0.3,
-            "max_tokens": 300  
-        }
-        res = requests.post(url, headers=headers, json=payload, timeout=60)
-        return res.json()["choices"][0]["message"]["content"]
-    else:
-        client = genai.Client(api_key=api_key)
-        
-        contents = [prompt]
-        if images_b64:
-            for img in images_b64:
-                # Converte base64 para PIL Image para o SDK do Gemini
-                img_data = base64.b64decode(img)
-                contents.append(Image.open(io.BytesIO(img_data)))
-
-        response = client.models.generate_content(
-            model="gemini-2.0-flash", 
-            contents=contents,
-            config={"max_output_tokens": 500}
-        )
-        return response.text or "Não foi possível gerar a explicação."
+    payload = {
+        "model": getattr(settings, "OPENROUTER_EXPLAINER_MODEL", "google/gemini-2.0-flash-001"),
+        "messages": [{"role": "user", "content": content_list}],
+        "temperature": 0.3,
+        "max_tokens": 500  
+    }
+    res = requests.post(url, headers=headers, json=payload, timeout=60)
+    res.raise_for_status()
+    return res.json()["choices"][0]["message"]["content"]

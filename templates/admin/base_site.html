@@ -1,0 +1,49 @@
+{% extends "admin/base.html" %}
+
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}">Pré-IFMA Admin</a></h1>
+{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    body {
+        zoom: 1.15;
+    }
+
+    :root,
+    .theme-light,
+    .theme-dark {
+        --primary: #198754 !important;
+        --secondary: #1e7e34 !important;
+        --header-bg: #198754 !important;
+        --header-color: #ffffff !important;
+        --link-fg: #1e7e34 !important;
+        --primary-fg: #ffffff !important;
+        --button-bg: #198754 !important;
+        --button-hover-bg: #105032 !important;
+    }
+
+    #header {
+        background: var(--header-bg) !important;
+        color: var(--header-color) !important;
+    }
+
+    #branding h1,
+    #branding h1 a:link,
+    #branding h1 a:visited {
+        color: var(--header-color) !important;
+    }
+
+    /* Forçando a barra de breadcrumbs a aceitar as novas cores */
+    div.breadcrumbs {
+        --breadcrumbs-bg: #0c4d2e;
+        --breadcrumbs-fg: #ffffff !important;
+        --breadcrumbs-link-fg: #ffffff !important;
+    }
+
+    div.breadcrumbs a {
+        color: var(--breadcrumbs-link-fg) !important;
+    }
+</style>
+{% endblock %}
