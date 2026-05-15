@@ -58,7 +58,7 @@ def get_or_generate_explanation(user, question_id: int) -> dict:
         }
 
     # 3. Chama IA
-    api_key = settings.OPENROUTER_API_KEY or settings.GEMINI_API_KEY
+    api_key = settings.OPENROUTER_API_KEY
     if not api_key:
         return {"error": "Serviço de IA não configurado no servidor."}
 

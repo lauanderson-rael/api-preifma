@@ -1,3 +1,4 @@
+from collections import abc
 from pathlib import Path
 import os
 from dotenv import load_dotenv
@@ -12,7 +13,6 @@ ALLOWED_HOSTS = ['*']
 AUTH_USER_MODEL = 'accounts.User'
 
 INSTALLED_APPS = [
-   # 'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -107,29 +107,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800
 FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800
 
-# IA Settings
-GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
 OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY', '')
-OPENROUTER_MODEL = os.environ.get('OPENROUTER_MODEL', 'google/gemini-2.0-flash-001')
-
-# JAZZMIN_SETTINGS = {
-#     "site_title": "PRE-IFMA Admin",
-#     "site_brand": "PRE-IFMA Admin",
-#     "welcome_sign": "Painel Administrativo", 
-#     "copyright": "Lauanderson Rael",  
-    
-#     "custom_links": {
-#         "parser": [{
-#             "name": "Abrir Parser IA", 
-#             "url": "/parser/", 
-#             "icon": "fas fa-robot",
-#             "permissions": ["auth.view_user"]
-#         }],
-#     },
-    
-#     "topmenu_links": [
-#         {"name": "Home",  "url": "admin:index", "permissions": ["auth.view_user"]},
-#         {"name": "Abrir Parser", "url": "/parser/", "new_window": True},
-#     ],
-# }
-
+OPENROUTER_PARSER_MODEL = os.environ.get('OPENROUTER_PARSER_MODEL', 'google/gemini-2.0-flash-thinking-exp:free')
+OPENROUTER_EXPLAINER_MODEL = os.environ.get('OPENROUTER_EXPLAINER_MODEL', 'google/gemini-2.0-flash-001')
+OPENROUTER_SITE_URL = os.environ.get('OPENROUTER_SITE_URL', 'http://localhost:8000')
