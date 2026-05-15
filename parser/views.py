@@ -14,14 +14,18 @@ from exams.services import save_exam_to_db
 from django.contrib.admin.views.decorators import staff_member_required
 
 
+from exams.models import Exam
+
 def landing(request: HttpRequest):
     return render(request, "landing.html")
 
 
 @staff_member_required(login_url='/admin/login/')
 def index(request: HttpRequest):
+    exams = Exam.objects.all().order_by('-year', 'name')
     return render(request, "parser/index.html", {
         "has_api_key": bool(settings.OPENROUTER_API_KEY),
+        "exams": exams,
     })
 
 

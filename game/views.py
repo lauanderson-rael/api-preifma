@@ -23,7 +23,7 @@ from .serializers import (
     UserMissionSerializer,
     DashboardSerializer,
 )
-from .services import update_streak, xp_per_correct
+from .services import get_or_create_daily_missions, xp_per_correct, get_or_generate_explanation
 from drf_spectacular.utils import extend_schema, extend_schema_view
 
 # Sessions
@@ -151,34 +151,59 @@ class SessionFinishView(APIView):
             user = request.user
             user.xp += xp_gained
             user.save(update_fields=['xp'])
-            new_streak = update_streak(user)
+
+            # Cálculo de estatísticas por matéria para missões inteligentes
+            stats_by_subject = {} # {'matematica': {'total': 0, 'correct': 0}, ...}
 
             for ans in answers.select_related('question'):
                 subj = ans.question.subject
+                if subj not in stats_by_subject:
+                    stats_by_subject[subj] = {'total': 0, 'correct': 0}
+                
+                stats_by_subject[subj]['total'] += 1
+                if ans.is_correct:
+                    stats_by_subject[subj]['correct'] += 1
+
+                # Atualiza o progresso global do usuário por matéria (SubjectProgress)
                 sp, _ = SubjectProgress.objects.get_or_create(user=user, subject=subj)
                 sp.questions_answered += 1
                 if ans.is_correct:
                     sp.correct_answers += 1
                 sp.save()
 
-            # Missões do dia 
+            # Atualização Inteligente de Missões do Dia
             from datetime import date
             today = date.today()
-            daily_missions = UserMission.objects.filter(user=user, date=today)
+            daily_missions = UserMission.objects.filter(user=user, date=today).select_related('mission')
             missions_updated = []
+
             for um in daily_missions:
                 if um.completed:
                     continue
-                if um.mission.goal_type == 'answer_questions':
-                    um.progress = min(um.progress + total, um.mission.goal_value)
-                elif um.mission.goal_type == 'correct_answers':
-                    um.progress = min(um.progress + correct_count, um.mission.goal_value)
-                if um.progress >= um.mission.goal_value:
+                
+                mission = um.mission
+                # Define qual valor usar: o total da sessão ou apenas o da matéria específica
+                if mission.goal_subject:
+                    subj_stats = stats_by_subject.get(mission.goal_subject, {'total': 0, 'correct': 0})
+                    session_total = subj_stats['total']
+                    session_correct = subj_stats['correct']
+                else:
+                    session_total = total
+                    session_correct = correct_count
+
+                # Aplica o progresso baseado no tipo de meta
+                if mission.goal_type == 'answer_questions':
+                    um.progress = min(um.progress + session_total, mission.goal_value)
+                elif mission.goal_type == 'correct_answers':
+                    um.progress = min(um.progress + session_correct, mission.goal_value)
+
+                if um.progress >= mission.goal_value:
                     um.completed = True
+                
                 um.save()
                 missions_updated.append({
-                    'id': um.mission.id,
-                    'title': um.mission.title,
+                    'id': mission.id,
+                    'title': mission.title,
                     'progress': um.progress,
                     'completed': um.completed,
                 })
@@ -191,7 +216,6 @@ class SessionFinishView(APIView):
                 'duration_seconds': session.duration_seconds,
                 'xp_gained': xp_gained,
                 'new_total_xp': user.xp,
-                'streak': new_streak,
                 'missions_updated': missions_updated,
             })
 
@@ -225,21 +249,8 @@ class DailyMissionsView(APIView):
     @extend_schema(summary="Listar missões diárias")
     def get(self, request):
         """GET /api/missions/daily/ — missões do dia com progresso."""
-        from datetime import date
-        today = date.today()
-        user = request.user
-
-        all_missions = Mission.objects.all()
-        for mission in all_missions:
-            UserMission.objects.get_or_create(
-                user=user, mission=mission, date=today,
-                defaults={'progress': 0, 'completed': False},
-            )
-
-        user_missions = (
-            UserMission.objects.filter(user=user, date=today)
-            .select_related('mission')
-        )
+        from .services import get_or_create_daily_missions
+        user_missions = get_or_create_daily_missions(request.user)
         return Response(UserMissionSerializer(user_missions, many=True).data)
 
 
@@ -303,33 +314,8 @@ class DashboardView(APIView):
         today = date.today()
         user = request.user
 
-        # Garante que existam 5 missões aleatórias para hoje
-        from datetime import date
-        import random as _random_missions
-        today = date.today()
-        
-        user_daily_missions = UserMission.objects.filter(user=user, date=today)
-        
-        if not user_daily_missions.exists():
-            all_available_missions = list(Mission.objects.all())
-            if all_available_missions:
-                # Sorteia até 5 missões
-                selected_missions = _random_missions.sample(
-                    all_available_missions, 
-                    min(5, len(all_available_missions))
-                )
-                for mission in selected_missions:
-                    UserMission.objects.create(
-                        user=user,
-                        mission=mission,
-                        date=today,
-                        progress=0,
-                        completed=False
-                    )
-        
-        daily_missions = UserMission.objects.filter(
-            user=user, date=today
-        ).select_related('mission') 
+        from .services import get_or_create_daily_missions
+        daily_missions = get_or_create_daily_missions(user)
        
         recent_sessions = StudySession.objects.filter(
             user=user, finished=True
@@ -342,9 +328,7 @@ class DashboardView(APIView):
         ai_usage_obj, _ = UserAIDailyUsage.objects.get_or_create(user=user, date=today)
 
         return Response({
-            'streak': user.streak,
             'xp': user.xp,
-            'last_study_date': user.last_study_date,
             'daily_missions': UserMissionSerializer(daily_missions, many=True).data,
             'recent_sessions': StudySessionListSerializer(recent_sessions, many=True).data,
             'subject_progress': SubjectProgressSerializer(subject_progress, many=True).data,

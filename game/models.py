@@ -83,14 +83,45 @@ class SubjectProgress(models.Model):
 class Mission(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
-    xp_reward = models.PositiveIntegerField()
-    goal_type = models.CharField(max_length=50)
+    XP_CHOICES = [ 
+        (50, '50 XP'),
+        (100, '100 XP'),
+        (150, '150 XP'),
+        (200, '200 XP'),
+        (250, '250 XP'),
+        (300, '300 XP'),
+    ]
+    xp_reward = models.PositiveIntegerField(choices=XP_CHOICES, default=100)
+    GOAL_TYPES = [
+        ('answer_questions', 'Responder Questões'),
+        ('correct_answers', 'Acertar Questões'),
+    ]
+    
+    SUBJECT_CHOICES = [
+        (None, 'Todas as Matérias (Geral)'),
+        ('portugues', 'Português'),
+        ('matematica', 'Matemática'),
+    ]
+
+    goal_type = models.CharField(max_length=50, choices=GOAL_TYPES)
     goal_value = models.PositiveIntegerField()
-    special_reward = models.CharField(
-        max_length=50, 
+    goal_subject = models.CharField(
+        max_length=20, 
+        choices=SUBJECT_CHOICES,
         blank=True, 
         null=True, 
-        help_text="Ex: 'AI_LIMIT' para aumentar limite diário de IA"
+        help_text="Se vazio, conta todas as matérias." 
+    )
+    REWARD_CHOICES = [
+        ('AI_LIMIT', '+2 Explicações com IA'), 
+    ]
+
+    special_reward = models.CharField(
+        max_length=50, 
+        choices=REWARD_CHOICES,
+        blank=True, 
+        null=True, 
+        help_text="Recompensa especial além do XP (opcional)."
     )
 
 

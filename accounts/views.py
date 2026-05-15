@@ -12,7 +12,7 @@ from rest_framework_simplejwt.views import TokenRefreshView
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from game.models import Answer
 from .serializers import RegisterSerializer, UserSerializer, LoginSerializer
-from game.services import update_streak
+from game.services import get_or_create_daily_missions
 from .level_utils import level_progress
 
 User = get_user_model()
@@ -53,7 +53,7 @@ class LoginView(APIView):
                 {'detail': 'E-mail ou senha inválidos.'},
                 status=status.HTTP_401_UNAUTHORIZED,
             )
-        update_streak(user)
+        # Login bem sucedido
 
         refresh = RefreshToken.for_user(user)
         return Response({
@@ -116,23 +116,9 @@ class StatsView(APIView):
             'xp_current_level': lp['xp_current_level'],
             'xp_to_next_level': lp['xp_to_next_level'],
             'progress_pct': lp['progress_pct'],
-            'streak': user.streak,
-            'last_study_date': user.last_study_date,
             'total_questions_answered': total_answered,
             'total_correct': total_correct,
             'accuracy': accuracy,
-        })
-
-
-class StreakView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    @extend_schema(summary="Ofensiva (Streak)")
-    def get(self, request):
-        """GET /api/streak/ — retorna a contagem de streak atual e a data do último estudo."""
-        return Response({
-            'current_streak': request.user.streak,
-            'last_study_date': request.user.last_study_date,
         })
 
 
@@ -140,4 +126,3 @@ class StreakView(APIView):
 class CustomTokenRefreshView(TokenRefreshView):
     """POST /api/auth/refresh/ — Recebe um refresh token e retorna um novo access token."""
     pass
-

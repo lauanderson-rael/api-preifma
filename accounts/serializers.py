@@ -28,10 +28,10 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'email', 'username', 'name',
-            'xp', 'level', 'xp_to_next_level', 'progress_pct',
-            'streak', 'last_study_date', 'created_at',
+            'xp', 'level', 'xp_to_next_level', 'progress_pct', 'created_at',
+            'ai_daily_limit'
         ]
-        read_only_fields = ['xp', 'level', 'xp_to_next_level', 'progress_pct', 'streak', 'last_study_date', 'created_at']
+        read_only_fields = ['xp', 'level', 'xp_to_next_level', 'progress_pct', 'created_at']
 
 
 class RegisterSerializer(serializers.ModelSerializer):

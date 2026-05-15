@@ -23,5 +23,15 @@ class SubjectProgressAdmin(admin.ModelAdmin):
     list_filter = ('subject',)
 
 
-admin.site.register(Mission)
-admin.site.register(UserMission)
+@admin.register(Mission)
+class MissionAdmin(admin.ModelAdmin):
+    list_display = ('title', 'goal_type', 'goal_subject', 'goal_value', 'xp_reward', 'special_reward')
+    list_filter = ('goal_type', 'goal_subject', 'special_reward')
+    search_fields = ('title', 'description')
+
+
+@admin.register(UserMission)
+class UserMissionAdmin(admin.ModelAdmin):
+    list_display = ('user', 'mission', 'progress', 'completed', 'date')
+    list_filter = ('completed', 'date')
+    search_fields = ('user__username', 'mission__title')

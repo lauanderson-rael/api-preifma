@@ -4,14 +4,14 @@ from .models import User
 
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
-    list_display = ('email', 'username', 'name', 'xp', 'streak', 'last_study_date', 'is_staff')
+    list_display = ('email', 'username', 'name', 'xp', 'is_staff')
     search_fields = ('email', 'username', 'name')
-    ordering = ('email',)
+    ordering = ('-xp',)
 
     fieldsets = (
-        (None, {'fields': ('email', 'password')}),
-        ('Informações Pessoais', {'fields': ('name', 'username')}),
-        ('Gamificação', {'fields': ('xp', 'streak', 'last_study_date')}),
+        (None, {'fields': ('email', 'username', 'password')}),
+        ('Informações Pessoais', {'fields': ('name',)}),
+        ('Gamificação', {'fields': ('xp', 'ai_daily_limit')}),
         ('Permissões', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
         ('Datas Importantes', {'fields': ('last_login', 'created_at')}),
     )

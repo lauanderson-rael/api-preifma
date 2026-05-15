@@ -1,27 +1,39 @@
+import random
 from datetime import date
 from django.conf import settings
 from .models import UserAIDailyUsage
 from exams.models import Question, QuestionExplanation
 from parser.services import generate_question_explanation
 
-
-def update_streak(user):
-    # ... (mantém igual) ...
+def get_or_create_daily_missions(user):
+    """
+    Garante que o usuário tenha exatamente 3 missões sorteadas para o dia de hoje.
+    Se não existirem, sorteia 3 novas da tabela global de Mission.
+    """
+    from .models import Mission, UserMission
     today = date.today()
-    lsd = user.last_study_date
-    if lsd is None:
-        user.streak = 1
-    elif lsd == today:
-        pass
+    
+    # 1. Verifica se já existem missões para hoje
+    existing = UserMission.objects.filter(user=user, date=today)
+    
+    if existing.exists():
+        return existing
+    
+    # 2. Se não existem, sorteia 3 novas
+    all_missions = list(Mission.objects.all())
+    if len(all_missions) < 3:
+        # Se houver menos de 3 cadastradas, pega o que tiver
+        selected = all_missions
     else:
-        delta = (today - lsd).days
-        if delta == 1:
-            user.streak += 1
-        else:
-            user.streak = 1
-    user.last_study_date = today
-    user.save(update_fields=['streak', 'last_study_date'])
-    return user.streak
+        selected = random.sample(all_missions, 3)
+        
+    # 3. Cria as UserMissions
+    new_missions = []
+    for m in selected:
+        new_missions.append(
+            UserMission.objects.create(user=user, mission=m, date=today)
+        )
+    return new_missions
 
 
 def get_or_generate_explanation(user, question_id: int) -> dict:
