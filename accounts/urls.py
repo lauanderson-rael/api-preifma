@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import (
     RegisterView, LoginView, MeView, ProfileView, 
-    StatsView, StreakView, CustomTokenRefreshView
+    StatsView, CustomTokenRefreshView
 )
 
 urlpatterns = [
@@ -15,6 +15,4 @@ urlpatterns = [
     path('users/profile/', ProfileView.as_view(), name='user-profile'),
     path('users/stats/', StatsView.as_view(), name='user-stats'),
 
-    # Streak
-    path('streak/', StreakView.as_view(), name='streak'),
 ]

@@ -101,7 +101,6 @@ class UserMissionSerializer(serializers.ModelSerializer):
 
 class DashboardSerializer(serializers.Serializer):
     """Exibe os parâmetros na documentação do Dashboard."""
-    streak = serializers.IntegerField(read_only=True)
     xp = serializers.IntegerField(read_only=True)
 
 

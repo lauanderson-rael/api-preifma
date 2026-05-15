@@ -66,7 +66,7 @@ python manage.py runserver
 *   `GET /api/users/stats/`: Estatísticas de desempenho (precisão, total de questões).
 
 ### 🎮 Gamificação & Sessões
-*   `GET /api/dashboard/`: Resumo para a home do App (Missões, XP, Streak).
+*   `GET /api/dashboard/`: Resumo para a home do App (Missões, XP, Cota de IA).
 *   `POST /api/sessions/start/`: Inicia uma nova sessão de estudos (Quick ou Simulado).
 *   `POST /api/sessions/<id>/answers/`: Envia a resposta de uma questão.
 *   `POST /api/sessions/<id>/finish/`: Finaliza a sessão (O backend calcula XP e duração automaticamente).
