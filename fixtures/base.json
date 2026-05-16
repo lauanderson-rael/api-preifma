@@ -95,7 +95,7 @@
     "fields": {
       "title": "Curiosidade Ativada",
       "description": "Responda 10 questões para bônus de IA",
-      "xp_reward": 150,
+      "xp_reward": 100,
       "goal_type": "answer_questions",
       "goal_value": 10,
       "goal_subject": null,
@@ -108,7 +108,7 @@
     "fields": {
       "title": "Lógica Afiada",
       "description": "Acerte 5 questões hoje",
-      "xp_reward": 120,
+      "xp_reward": 50,
       "goal_type": "correct_answers",
       "goal_value": 5,
       "goal_subject": null,
@@ -121,7 +121,7 @@
     "fields": {
       "title": "Explorador de Conteúdo",
       "description": "Responda 15 questões",
-      "xp_reward": 200,
+      "xp_reward": 150,
       "goal_type": "answer_questions",
       "goal_value": 15,
       "goal_subject": null,
@@ -134,7 +134,7 @@
     "fields": {
       "title": "Sábio do Português",
       "description": "Responda 12 questões de Português",
-      "xp_reward": 150,
+      "xp_reward": 100,
       "goal_type": "answer_questions",
       "goal_value": 12,
       "goal_subject": "portugues",
@@ -147,7 +147,7 @@
     "fields": {
       "title": "Calculadora Humana",
       "description": "Acerte 8 questões de Matemática",
-      "xp_reward": 200,
+      "xp_reward": 150,
       "goal_type": "correct_answers",
       "goal_value": 8,
       "goal_subject": "matematica",

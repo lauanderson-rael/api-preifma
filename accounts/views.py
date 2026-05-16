@@ -21,7 +21,7 @@ class RegisterView(APIView):
     permission_classes = [AllowAny]
     serializer_class = RegisterSerializer
 
-    @extend_schema(summary="Registrar novo usuário")
+    @extend_schema(summary="Registrar novo usuário", tags=["auth"])
     def post(self, request):
         """POST /api/auth/register/ — cria conta e retorna tokens JWT."""
         serializer = RegisterSerializer(data=request.data)
@@ -40,7 +40,7 @@ class LoginView(APIView):
     permission_classes = [AllowAny]
     serializer_class = LoginSerializer
 
-    @extend_schema(summary="Login de usuário")
+    @extend_schema(summary="Login de usuário", tags=["auth"])
     def post(self, request):
         """POST /api/auth/login/ — autentica usuário, atualiza streak, retorna tokens."""
         from django.contrib.auth import authenticate
@@ -62,7 +62,7 @@ class LoginView(APIView):
             'refresh': str(refresh),
         })
 
-@extend_schema(summary="Refresh token")
+@extend_schema(summary="Renovar token de acesso", tags=["auth"])
 class CustomTokenRefreshView(TokenRefreshView):
     """POST /api/auth/refresh/ — Recebe um refresh token e retorna um novo access token."""
     pass
@@ -70,15 +70,15 @@ class CustomTokenRefreshView(TokenRefreshView):
 
 class MeView(APIView):
     permission_classes = [IsAuthenticated]
-    @extend_schema(summary="Dados do usuário logado")
+    @extend_schema(summary="Dados do usuário logado", tags=["users"])
     def get(self, request):
         """GET /api/auth/me/ — dados básicos do usuário logado."""
         return Response(UserSerializer(request.user).data)
 
 
 @extend_schema_view(
-    get=extend_schema(summary="Exibir perfil completo"),
-    patch=extend_schema(summary="Atualizar nome/username"),
+    get=extend_schema(summary="Exibir perfil completo", tags=["users"]),
+    patch=extend_schema(summary="Atualizar nome/username", tags=["users"]),
 )
 class ProfileView(generics.RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
@@ -100,7 +100,7 @@ class ProfileView(generics.RetrieveUpdateAPIView):
 
 class StatsView(APIView):
     permission_classes = [IsAuthenticated]
-    @extend_schema(summary="Estatísticas de desempenho")
+    @extend_schema(summary="Estatísticas de desempenho", tags=["users"])
     def get(self, request):
         """GET /api/users/stats/ — xp, nível (curva progressiva), streak, acurácia."""
         user = request.user
@@ -122,7 +122,3 @@ class StatsView(APIView):
         })
 
 
-@extend_schema(summary="Renovar token de acesso")
-class CustomTokenRefreshView(TokenRefreshView):
-    """POST /api/auth/refresh/ — Recebe um refresh token e retorna um novo access token."""
-    pass
