@@ -6,7 +6,7 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-ifma-parser-dev-key-change-in-production'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-default-key-for-dev')
 DEBUG = True
 ALLOWED_HOSTS = ['*']
 
@@ -57,6 +57,7 @@ SIMPLE_JWT = {
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -98,16 +99,20 @@ DATABASES = {
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Configuração para servir arquivos estáticos via WhiteNoise
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800
+DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800 
 FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800
 
 OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY', '')
-OPENROUTER_PARSER_MODEL = os.environ.get('OPENROUTER_PARSER_MODEL', 'google/gemini-2.0-flash-thinking-exp:free')
+OPENROUTER_PARSER_MODEL = os.environ.get('OPENROUTER_PARSER_MODEL', 'google/gemini-3-flash-preview')
 OPENROUTER_EXPLAINER_MODEL = os.environ.get('OPENROUTER_EXPLAINER_MODEL', 'google/gemini-2.0-flash-001')
 OPENROUTER_SITE_URL = os.environ.get('OPENROUTER_SITE_URL', 'http://localhost:8000')

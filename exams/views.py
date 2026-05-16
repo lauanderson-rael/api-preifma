@@ -120,7 +120,13 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
         
         questions = self.get_queryset().filter(id__in=final_ids)
         serializer = self.get_serializer(questions, many=True)
+        
+        # Sobrescreve o campo 'number' para ser sequencial (1 a 30) no simulado
+        data = serializer.data
+        for i, item in enumerate(data):
+            item['number'] = i + 1
+
         return Response({
-            "total": questions.count(),
-            "results": serializer.data
+            "total": len(data),
+            "results": data
         })

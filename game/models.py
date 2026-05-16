@@ -83,13 +83,13 @@ class SubjectProgress(models.Model):
 class Mission(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
-    XP_CHOICES = [ 
+    XP_CHOICES = [
         (50, '50 XP'),
+        (80, '80 XP'),
         (100, '100 XP'),
+        (120, '120 XP'),
         (150, '150 XP'),
         (200, '200 XP'),
-        (250, '250 XP'),
-        (300, '300 XP'),
     ]
     xp_reward = models.PositiveIntegerField(choices=XP_CHOICES, default=100)
     GOAL_TYPES = [
