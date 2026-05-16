@@ -219,7 +219,7 @@ def generate_question_explanation(question_text: str, alternatives: list, correc
     import json
     
     prompt = f"""
-    Explique de forma didática e curta por que a alternativa {correct_letter} é a correta para esta questão.
+    Explique de forma curta e direta apenas por que a alternativa {correct_letter} é a correta para esta questão.
     
     QUESTÃO:
     {question_text}
@@ -228,9 +228,9 @@ def generate_question_explanation(question_text: str, alternatives: list, correc
     {json.dumps(alternatives, ensure_ascii=False)}
     
     Regras:
-    1. Seja direto e use linguagem simples para estudantes de ensino fundamental/médio.
-    2. Use formatação Markdown (negrito para fórmulas e valores, listas para as alternativas incorretas).
-    3. Comece explicando o conceito e depois mostre por que as outras estão erradas (se necessário).
+    1. Seja extremamente direto e didático (máximo 3 parágrafos curtos).
+    2. NÃO explique as alternativas incorretas.
+    3. Use negrito para destacar termos-chave ou fórmulas.
     4. Retorne apenas o texto da explicação, sem saudações ou introduções.
     """
 
@@ -253,8 +253,8 @@ def generate_question_explanation(question_text: str, alternatives: list, correc
     payload = {
         "model": getattr(settings, "OPENROUTER_EXPLAINER_MODEL", "google/gemini-2.0-flash-001"),
         "messages": [{"role": "user", "content": content_list}],
-        "temperature": 0.3,
-        "max_tokens": 500  
+        "temperature": 0.3, 
+        "max_tokens": 400  
     }
     res = requests.post(url, headers=headers, json=payload, timeout=60)
     res.raise_for_status()
