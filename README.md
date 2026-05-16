@@ -37,6 +37,10 @@ OPENROUTER_API_KEY=sua_chave_aqui
 OPENROUTER_PARSER_MODEL=nome_do_modelo
 OPENROUTER_EXPLAINER_MODEL=nome_do_modelo 
 OPENROUTER_SITE_URL=url_do_seu_site 
+
+# Resend (Serviço de Email) 
+RESEND_API_KEY=re_sua_chave_aqui 
+DEFAULT_FROM_EMAIL=Pré-IFMA <suporte@lauanderson.site>
 ```
 
 ### 3. 🐳 Instalação via Docker

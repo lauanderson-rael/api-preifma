@@ -10,6 +10,8 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-default-key-fo
 DEBUG = True
 ALLOWED_HOSTS = ['*']
 
+LANGUAGE_CODE = 'pt-br' 
+
 AUTH_USER_MODEL = 'accounts.User'
 
 INSTALLED_APPS = [
@@ -25,6 +27,7 @@ INSTALLED_APPS = [
     'game',
     'rest_framework',
     'drf_spectacular',
+    'django_rest_passwordreset',
 ]
 
 REST_FRAMEWORK = {
@@ -44,6 +47,12 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'Documentação dos endpoints da plataforma educacional PRÉ-IFMA.',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_PATCH': True,
+    'SWAGGER_UI_SETTINGS': {
+        'deepLinking': True,
+        'defaultModelRendering': 'model',
+        'displayRequestDuration': True,
+    },
 }
 
 from datetime import timedelta
@@ -101,6 +110,7 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+
 # Configuração para servir arquivos estáticos via WhiteNoise
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
@@ -116,3 +126,13 @@ OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY', '')
 OPENROUTER_PARSER_MODEL = os.environ.get('OPENROUTER_PARSER_MODEL', 'google/gemini-3-flash-preview')
 OPENROUTER_EXPLAINER_MODEL = os.environ.get('OPENROUTER_EXPLAINER_MODEL', 'google/gemini-2.0-flash-001')
 OPENROUTER_SITE_URL = os.environ.get('OPENROUTER_SITE_URL', 'http://localhost:8000')
+
+
+# Configurações de E-mail (Resend via SMTP)
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.resend.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'resend'
+EMAIL_HOST_PASSWORD = os.environ.get('RESEND_API_KEY', '')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'PreIFMA <onboarding@resend.dev>')
