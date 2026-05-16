@@ -1,0 +1,157 @@
+[
+  {
+    "model": "accounts.user",
+    "pk": 1,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$1qcWMHnofgdhDH76fjkN6p$EPY7WsgpL7Zdf3PQfLLhx52cllzTTUnL21THygMXI40=",
+      "last_login": null,
+      "is_superuser": true,
+      "email": "admin@preifma.com",
+      "username": "admin",
+      "name": "Administrador",
+      "xp": 0,
+      "ai_daily_limit": 5,
+      "is_active": true,
+      "is_staff": true,
+      "created_at": "2026-05-01T19:09:13.658Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "accounts.user",
+    "pk": 4,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$myfztCGW5HrEMWvf70Clcq$dYcjD57i5m9wdstIr+oAX+dFZB/d9Whdno/C/yGKK9Y=",
+      "last_login": null,
+      "is_superuser": false,
+      "email": "aluno@preifma.com",
+      "username": "aluno_teste",
+      "name": "Aluno Teste",
+      "xp": 0,
+      "ai_daily_limit": 3,
+      "is_active": true,
+      "is_staff": false,
+      "created_at": "2026-05-12T19:50:15.476Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "game.mission",
+    "pk": 1,
+    "fields": {
+      "title": "Estudioso do Dia",
+      "description": "Responda 10 questões hoje.",
+      "xp_reward": 100,
+      "goal_type": "answer_questions",
+      "goal_value": 10,
+      "goal_subject": null,
+      "special_reward": null
+    }
+  },
+  {
+    "model": "game.mission",
+    "pk": 2,
+    "fields": {
+      "title": "Precisão Cirúrgica",
+      "description": "Acerte 5 questões hoje.",
+      "xp_reward": 150,
+      "goal_type": "correct_answers",
+      "goal_value": 5,
+      "goal_subject": null,
+      "special_reward": null
+    }
+  },
+  {
+    "model": "game.mission",
+    "pk": 4,
+    "fields": {
+      "title": "Primeiros Passos",
+      "description": "Responda 5 questões hoje",
+      "xp_reward": 50,
+      "goal_type": "answer_questions",
+      "goal_value": 5,
+      "goal_subject": null,
+      "special_reward": null
+    }
+  },
+  {
+    "model": "game.mission",
+    "pk": 5,
+    "fields": {
+      "title": "Mestre da Precisão",
+      "description": "Acerte 3 questões hoje",
+      "xp_reward": 100,
+      "goal_type": "correct_answers",
+      "goal_value": 3,
+      "goal_subject": null,
+      "special_reward": null
+    }
+  },
+  {
+    "model": "game.mission",
+    "pk": 6,
+    "fields": {
+      "title": "Curiosidade Ativada",
+      "description": "Responda 10 questões para bônus de IA",
+      "xp_reward": 150,
+      "goal_type": "answer_questions",
+      "goal_value": 10,
+      "goal_subject": null,
+      "special_reward": "AI_LIMIT"
+    }
+  },
+  {
+    "model": "game.mission",
+    "pk": 10,
+    "fields": {
+      "title": "Lógica Afiada",
+      "description": "Acerte 5 questões hoje",
+      "xp_reward": 120,
+      "goal_type": "correct_answers",
+      "goal_value": 5,
+      "goal_subject": null,
+      "special_reward": null
+    }
+  },
+  {
+    "model": "game.mission",
+    "pk": 11,
+    "fields": {
+      "title": "Explorador de Conteúdo",
+      "description": "Responda 15 questões",
+      "xp_reward": 200,
+      "goal_type": "answer_questions",
+      "goal_value": 15,
+      "goal_subject": null,
+      "special_reward": null
+    }
+  },
+  {
+    "model": "game.mission",
+    "pk": 13,
+    "fields": {
+      "title": "Sábio do Português",
+      "description": "Responda 12 questões de Português",
+      "xp_reward": 150,
+      "goal_type": "answer_questions",
+      "goal_value": 12,
+      "goal_subject": "portugues",
+      "special_reward": null
+    }
+  },
+  {
+    "model": "game.mission",
+    "pk": 18,
+    "fields": {
+      "title": "Calculadora Humana",
+      "description": "Acerte 8 questões de Matemática",
+      "xp_reward": 200,
+      "goal_type": "correct_answers",
+      "goal_value": 8,
+      "goal_subject": "matematica",
+      "special_reward": null
+    }
+  }
+]

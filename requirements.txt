@@ -9,3 +9,5 @@ djangorestframework-simplejwt
 gunicorn>=22.0.0
 uvicorn>=0.30.0
 whitenoise>=6.7.0
+python-dotenv>=1.0.0
+drf-spectacular>=0.26.0
