@@ -103,6 +103,7 @@ class UserMissionSerializer(serializers.ModelSerializer):
 
 class DashboardSerializer(serializers.Serializer):
     """Exibe os parâmetros na documentação do Dashboard."""
+    level = serializers.IntegerField(read_only=True)
     xp = serializers.IntegerField(read_only=True)
 
 

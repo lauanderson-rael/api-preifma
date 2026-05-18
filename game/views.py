@@ -315,6 +315,8 @@ class DashboardView(APIView):
         user = request.user
 
         from .services import get_or_create_daily_missions
+        from accounts.level_utils import level_progress
+        
         daily_missions = get_or_create_daily_missions(user)
        
         recent_sessions = StudySession.objects.filter(
@@ -327,7 +329,10 @@ class DashboardView(APIView):
         today = date.today()
         ai_usage_obj, _ = UserAIDailyUsage.objects.get_or_create(user=user, date=today)
 
+        level_data = level_progress(user.xp)
+
         return Response({
+            'level': level_data['level'],
             'xp': user.xp,
             'daily_missions': UserMissionSerializer(daily_missions, many=True).data,
             'recent_sessions': StudySessionListSerializer(recent_sessions, many=True).data,
