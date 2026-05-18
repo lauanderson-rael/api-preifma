@@ -29,3 +29,6 @@ staticfiles/
 Thumbs.db
 files_project/*
 comands.md
+
+# outros 
+DEPLOY_SERVER.md 
