@@ -8,6 +8,9 @@
     <title>PRÉ-IFMA | Plataforma Educacional de IA</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+        integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -121,30 +124,95 @@
         </section>
 
         <!-- App Mobile -->
-        <section class="text-center max-w-4xl mx-auto">
-            <span class="text-emerald-600 font-bold tracking-widest uppercase text-sm">Para o Aluno</span>
-            <h2 class="text-3xl font-bold mt-2 mb-6">Aplicativo Mobile Gamificado</h2>
-            <p class="text-gray-600 mb-12">
-                Transformamos o estudo para o IFMA em uma jornada viciante e eficiente através de mecânicas de jogos.
-            </p>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
-                <div class="p-6 bg-white rounded-2xl shadow-sm hover:shadow-md transition">
-                    <div
-                        class="bg-emerald-100 w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-4 text-lg">
-                        🏆</div>
-                    <h5 class="font-bold">Níveis & XP</h5>
+        <section class="max-w-6xl mx-auto">
+            <div class="text-center mb-12">
+                <span class="text-emerald-600 font-bold tracking-widest uppercase text-sm">Para o Aluno</span>
+                <h2 class="text-4xl font-extrabold mt-2 mb-4">Aplicativo Mobile Gamificado</h2>
+                <p class="text-gray-600 text-lg max-w-2xl mx-auto">
+                    Transformamos o estudo para o IFMA em uma jornada viciante e eficiente através de mecânicas de
+                    jogos. O aplicativo completo já está disponível para Android.
+                </p>
+                <div class="mt-8">
+                    <a href="https://expo.dev/artifacts/eas/oaaXsiYNZNsuuR5deEgyVz.apk" target="_blank"
+                        class="inline-flex items-center gap-3 bg-emerald-600 text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-emerald-700 transition shadow-xl hover:shadow-emerald-500/30 transform hover:-translate-y-1">
+                        <i class="fa-brands fa-android text-2xl"></i>
+                        Baixar App (Android APK)
+                    </a>
                 </div>
-                <div class="p-6 bg-white rounded-2xl shadow-sm hover:shadow-md transition">
+            </div>
+
+            <!-- Images Row -->
+            <div class="flex flex-col md:flex-row justify-center gap-6 mb-16 px-4">
+                <div class="relative group max-w-[280px] mx-auto md:mx-0">
                     <div
-                        class="bg-emerald-100 w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-4 text-lg">
-                        🎯</div>
-                    <h5 class="font-bold">Missões</h5>
+                        class="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-teal-400 rounded-[2.5rem] blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200">
+                    </div>
+                    <img src="{% static 'common/img/app-home.png' %}" alt="App Home"
+                        class="relative rounded-[2rem] shadow-2xl border-[6px] border-gray-900 object-cover">
                 </div>
-                <div class="p-6 bg-white rounded-2xl shadow-sm hover:shadow-md transition">
+                <div class="relative group max-w-[280px] mx-auto md:mx-0 md:-translate-y-6">
                     <div
-                        class="bg-emerald-100 w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-4 text-lg">
-                        🤖</div>
-                    <h5 class="font-bold">Explicações por IA</h5>
+                        class="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-teal-400 rounded-[2.5rem] blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200">
+                    </div>
+                    <img src="{% static 'common/img/app-missions.png' %}" alt="App Missões"
+                        class="relative rounded-[2rem] shadow-2xl border-[6px] border-gray-900 object-cover">
+                </div>
+                <div class="relative group max-w-[280px] mx-auto md:mx-0">
+                    <div
+                        class="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-teal-400 rounded-[2.5rem] blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200">
+                    </div>
+                    <img src="{% static 'common/img/app-question.png' %}" alt="App Questões"
+                        class="relative rounded-[2rem] shadow-2xl border-[6px] border-gray-900 object-cover">
+                </div>
+            </div>
+
+            <!-- Features Grid -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="p-6 bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
+                    <div
+                        class="bg-emerald-50 w-12 h-12 rounded-xl flex items-center justify-center mb-4 text-emerald-600 text-xl">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </div>
+                    <h4 class="text-xl font-bold mb-2">Simulados Completos</h4>
+                    <p class="text-gray-600 text-sm">Realização de provas cronometradas com resultados detalhados e
+                        acesso ao gabarito após a conclusão.</p>
+                </div>
+                <div class="p-6 bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
+                    <div
+                        class="bg-emerald-50 w-12 h-12 rounded-xl flex items-center justify-center mb-4 text-emerald-600 text-xl">
+                        <i class="fa-solid fa-book-open"></i>
+                    </div>
+                    <h4 class="text-xl font-bold mb-2">Estudo Personalizado</h4>
+                    <p class="text-gray-600 text-sm">Resolução de questões aleatórias e filtros avançados (disciplina,
+                        modalidade) com feedback imediato.</p>
+                </div>
+                <div class="p-6 bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
+                    <div
+                        class="bg-emerald-50 w-12 h-12 rounded-xl flex items-center justify-center mb-4 text-emerald-600 text-xl">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <h4 class="text-xl font-bold mb-2">Explicação com IA</h4>
+                    <p class="text-gray-600 text-sm">Explicações detalhadas geradas por Inteligência Artificial para
+                        cada questão, para você entender o porquê da resposta.</p>
+                </div>
+                <div class="p-6 bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
+                    <div
+                        class="bg-emerald-50 w-12 h-12 rounded-xl flex items-center justify-center mb-4 text-emerald-600 text-xl">
+                        <i class="fa-solid fa-bullseye"></i>
+                    </div>
+                    <h4 class="text-xl font-bold mb-2">Missões e Gamificação</h4>
+                    <p class="text-gray-600 text-sm">Missões diárias que incentivam o estudo regular. Suba de nível com
+                        pontos de experiência (XP) baseados no seu desempenho.</p>
+                </div>
+                <div
+                    class="p-6 bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition md:col-span-2 lg:col-span-1">
+                    <div
+                        class="bg-emerald-50 w-12 h-12 rounded-xl flex items-center justify-center mb-4 text-emerald-600 text-xl">
+                        <i class="fa-solid fa-user-shield"></i>
+                    </div>
+                    <h4 class="text-xl font-bold mb-2">Segurança e Perfil</h4>
+                    <p class="text-gray-600 text-sm">Acompanhamento do seu progresso, autenticação JWT segura e fluxo de
+                        recuperação de senha direto pelo aplicativo.</p>
                 </div>
             </div>
         </section>
