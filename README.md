@@ -55,9 +55,6 @@ docker exec -it preifma_api python manage.py makemigrations
 docker exec -it preifma_api python manage.py migrate
 docker exec -it preifma_api python manage.py seed_db
 
-# (Opcional) Resetar senhas para o padrão
-docker exec -it preifma_api python manage.py shell -c "from accounts.models import User; u = User.objects.get(username='admin'); u.set_password('admin123'); u.save()"
-docker exec -it preifma_api python manage.py shell -c "from accounts.models import User; u = User.objects.get(username='aluno_teste'); u.set_password('aluno123'); u.save()"
 ```
 ---
 
