@@ -37,6 +37,14 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '30/minute', # para anônimos
+        'user': '120/minute'  # para usuários logados
+    },
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
@@ -126,7 +134,6 @@ OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY', '')
 OPENROUTER_PARSER_MODEL = os.environ.get('OPENROUTER_PARSER_MODEL', 'google/gemini-3-flash-preview')
 OPENROUTER_EXPLAINER_MODEL = os.environ.get('OPENROUTER_EXPLAINER_MODEL', 'google/gemini-2.0-flash-001')
 OPENROUTER_SITE_URL = os.environ.get('OPENROUTER_SITE_URL', 'http://localhost:8000')
-
 
 # Configurações de E-mail (Resend via SMTP)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
