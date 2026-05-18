@@ -86,7 +86,9 @@ class SubjectProgressSerializer(serializers.ModelSerializer):
 class MissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Mission
-        fields = ['id', 'title', 'description', 'xp_reward', 'goal_type', 'goal_value']
+        fields = ['id', 'title', 'description', 'xp_reward', 'goal_type', 'goal_value', 'special_reward', 'special_reward_display']
+    
+    special_reward_display = serializers.CharField(source='get_special_reward_display', read_only=True)
 
 
 class UserMissionSerializer(serializers.ModelSerializer):
