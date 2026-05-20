@@ -1,12 +1,12 @@
+import json
+import os
+import zipfile
+import tempfile
 from django.contrib import admin, messages
 from django.urls import path
 from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect
 from django import forms
-import json
-import zipfile
-import tempfile
-import os
 from .services import save_exam_to_db
 from .models import Attachment, Exam, Question, QuestionAttachment, Alternative
 
@@ -37,7 +37,7 @@ class ExamAdmin(admin.ModelAdmin):
     list_filter = ('year', 'type')
     search_fields = ('name',)
     change_list_template = "admin/exams/exam/change_list.html"
-
+ 
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [
@@ -52,13 +52,11 @@ class ExamAdmin(admin.ModelAdmin):
                 zip_file = request.FILES['zip_file']
                 try:
                     with tempfile.TemporaryDirectory() as tmp_dir:
-                        # Salvar o upload
                         temp_zip_path = os.path.join(tmp_dir, 'upload.zip')
                         with open(temp_zip_path, 'wb+') as destination:
-                            for chunk in zip_file.chunks():
+                            for chunk in zip_file.chunks(): 
                                 destination.write(chunk)
 
-                        # Extrair
                         with zipfile.ZipFile(temp_zip_path, 'r') as zip_ref:
                             zip_ref.extractall(tmp_dir)
 
@@ -97,7 +95,6 @@ class ExamAdmin(admin.ModelAdmin):
         form = ZipUploadForm()
         payload = {"form": form, "opts": self.model._meta}
         return render(request, "admin/exams/exam/import_zip.html", payload)
-
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):

@@ -2,7 +2,6 @@ import os
 import json
 import zipfile
 import tempfile
-import shutil
 from django.core.management.base import BaseCommand
 from django.core.management import call_command
 from exams.services import save_exam_to_db
@@ -39,9 +38,8 @@ class Command(BaseCommand):
             
             try:
                 with tempfile.TemporaryDirectory() as tmp_dir:
-                    # Extrair
                     with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-                        zip_ref.extractall(tmp_dir)
+                        zip_ref.extractall(tmp_dir) 
 
                     # Localizar prova.json
                     json_path = None

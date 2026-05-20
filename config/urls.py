@@ -3,13 +3,11 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
-from parser.views import landing
-
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from django_rest_passwordreset.views import ResetPasswordRequestToken, ResetPasswordConfirm, ResetPasswordValidateToken
 from drf_spectacular.utils import extend_schema_view, extend_schema
+from parser.views import landing
 
-# Tradução customizada para erro de e-mail não encontrado
 class CustomResetPasswordRequestToken(ResetPasswordRequestToken):
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)

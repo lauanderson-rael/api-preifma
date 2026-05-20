@@ -1,12 +1,10 @@
 import random as _random
-
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema, extend_schema_view
-
 from .models import Exam, Question
 from .serializers import ExamSerializer, ExamDetailSerializer, QuestionSerializer
 
@@ -62,7 +60,6 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
             'questionattachment_set__attachment',
         ).all()
         
-        # Filtros via Query Params
         subject = self.request.query_params.get('subject')
         exam_type = self.request.query_params.get('exam_type')
         
@@ -105,8 +102,6 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
     def simulated(self, request):
         """GET /api/questions/simulated/ — Gera um simulado balanceado (15 Port + 15 Mat)."""
         exam_type = request.query_params.get('exam_type', 'integrado')
-        
-        # Busca 15 de cada matéria baseado no tipo de prova
         qs = self.get_queryset().filter(exam__type__in=exam_type.split(','))
         
         port_ids = list(qs.filter(subject='portugues').values_list('id', flat=True))
@@ -116,11 +111,11 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
         sampled_mat = _random.sample(mat_ids, min(15, len(mat_ids)))
         
         final_ids = sampled_port + sampled_mat
-        _random.shuffle(final_ids) # Mistura a ordem (Port e Mat intercalados)
+        _random.shuffle(final_ids) 
         
         questions = self.get_queryset().filter(id__in=final_ids)
         serializer = self.get_serializer(questions, many=True)
-        
+         
         # Sobrescreve o campo 'number' para ser sequencial (1 a 30) no simulado
         data = serializer.data
         for i, item in enumerate(data):

@@ -1,8 +1,5 @@
 from rest_framework import serializers
-from .models import (
-    StudySession, Answer, SubjectProgress,
-    Mission, UserMission,
-)
+from .models import (StudySession, Answer, SubjectProgress, Mission, UserMission,)
 from exams.serializers import QuestionSerializer
 
 

@@ -7,9 +7,7 @@ from django.core.files.base import ContentFile
 from exams.models import Exam, Question, Alternative, Attachment, QuestionAttachment
 
 def save_exam_to_db(data: Union[dict, str], default_year: Optional[int] = None, base_path: Optional[str] = None) -> dict:
-    """
-    Ingere uma prova no banco de dados exclusivamente a partir de JSON estruturado.
-    """
+    """Salva uma prova no banco de dados a partir de JSON estruturado."""
     json_data = None
     if isinstance(data, dict):
         json_data = data
@@ -31,7 +29,7 @@ def _save_exam_from_json(data: dict, default_year: Optional[int] = None, base_pa
     questions_saved = 0
     errors = []
 
-    # ── A. Extrair Metadados da Prova ──────────────────────────────────────
+    # 1. Extrair Metadados da Prova
     metadata = data.get("metadata", {})
     exam_title = metadata.get("exam_title", "Sem Título")
     year = metadata.get("year") or default_year or 2025
@@ -47,7 +45,7 @@ def _save_exam_from_json(data: dict, default_year: Optional[int] = None, base_pa
         defaults={'name': exam_title}
     )
 
-    # ── B. Construir a Biblioteca Global de Anexos ─────────────────────────
+    # 2. Construir a Biblioteca Global de Anexos
     attachment_library: dict[str, Attachment] = {}
     global_attachments = data.get("global_attachments", [])
     for item in global_attachments:
@@ -75,7 +73,7 @@ def _save_exam_from_json(data: dict, default_year: Optional[int] = None, base_pa
             if label: attachment_library[label] = att
             if item_id: attachment_library[item_id] = att
 
-    # ── C. Processar Questões ──────────────────────────────────────────────
+    # 3. Processar Questões
     questions_list = data.get("questions", [])
     for q_data in questions_list:
         try:
@@ -87,14 +85,12 @@ def _save_exam_from_json(data: dict, default_year: Optional[int] = None, base_pa
             statement = q_data.get("text", "")
             correct_letter = q_data.get("correct_answer", "").upper()
 
-            # 1. Criar ou Reutilizar Questão
             question, _ = Question.objects.update_or_create(
                 exam=exam,
                 number=q_number,
                 defaults={'subject': subject, 'statement': statement}
             )
 
-            # 2. Vincular Anexos
             QuestionAttachment.objects.filter(question=question).delete()
             local_refs = q_data.get("local_attachments", [])
             for i, ref_key in enumerate(local_refs):
@@ -106,7 +102,6 @@ def _save_exam_from_json(data: dict, default_year: Optional[int] = None, base_pa
                         order=i + 1
                     )
 
-            # 3. Alternativas
             alternatives = q_data.get("alternatives", [])
             for alt in alternatives:
                 letter = alt.get("letter", "").upper()
@@ -165,9 +160,9 @@ def _save_image_from_path(file_path: str, label: Optional[str] = None) -> Option
     return att
 
 
-def _save_text_attachment(html_content: str, label: Optional[str] = None) -> Optional[Attachment]:
-    """Salva texto HTML limpo na biblioteca e retorna o Attachment."""
-    text_content = html_content.strip()
+def _save_text_attachment(text_content: str, label: Optional[str] = None) -> Optional[Attachment]:
+    """Salva texto limpo na biblioteca e retorna o Attachment."""
+    text_content = text_content.strip() 
     if not text_content:
         return None
     text_hash = hashlib.md5(text_content.encode()).hexdigest()

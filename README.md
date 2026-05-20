@@ -40,7 +40,7 @@ OPENROUTER_SITE_URL=url_do_seu_site
 
 # Resend (Serviço de Email) 
 RESEND_API_KEY=re_sua_chave_aqui 
-DEFAULT_FROM_EMAIL=Pré-IFMA <suporte@lauanderson.site>
+DEFAULT_FROM_EMAIL="Pré-IFMA <onboarding@resend.dev>"
 ```
 
 ### 3. 🐳 Instalação via Docker

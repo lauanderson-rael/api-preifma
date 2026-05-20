@@ -1,20 +1,18 @@
+import json
+import os
+import zipfile
+import tempfile
 import traceback
 from django.shortcuts import render
 from django.http import JsonResponse, HttpRequest
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.conf import settings 
-import json
-import zipfile
-import tempfile
-import os
-
-from .services import run_pipeline
+from exams.models import Exam 
 from exams.services import save_exam_to_db
 from django.contrib.admin.views.decorators import staff_member_required
 
-
-from exams.models import Exam
+from .services import run_pipeline
 
 def landing(request: HttpRequest):
     return render(request, "landing.html")
@@ -33,20 +31,11 @@ def index(request: HttpRequest):
 @csrf_exempt
 @require_http_methods(["POST"])
 def process(request: HttpRequest):
-    """
-    Recebe:   exam_pdf (obrigatório), answer_key_pdf (opcional),
-              api_key_override (opcional — quando a chave não está no servidor)
-    Devolve:  JSON { "html": "..." } ou { "error": "..." }
-    """
-    # Chave: prioridade → override do form → OpenRouter
-    api_key = (request.POST.get("api_key_override", "").strip() or 
-               settings.OPENROUTER_API_KEY)
+    """Processa o PDF da prova e retorna o JSON estruturado.""" 
+    api_key = (request.POST.get("api_key_override", "").strip() or settings.OPENROUTER_API_KEY)
 
     if not api_key:
-        return JsonResponse(
-            {"error": "Nenhuma chave de API configurada (Gemini ou OpenRouter)."},
-            status=500,
-        )
+        return JsonResponse({"error": "Nenhuma chave de API configurada (OpenRouter)."}, status=500)
 
     exam_file = request.FILES.get("exam_pdf")
     if not exam_file:
@@ -70,9 +59,7 @@ def process(request: HttpRequest):
 @csrf_exempt
 @require_http_methods(["POST"])
 def save_to_db_view(request: HttpRequest):
-    """
-    Recebe os dados estruturados da prova (JSON) via POST e salva no banco de dados.
-    """
+    """Recebe os dados estruturados da prova (JSON) via POST e salva no banco de dados."""
     try:
         data = json.loads(request.body)
         
@@ -94,26 +81,22 @@ def save_to_db_view(request: HttpRequest):
 @csrf_exempt
 @require_http_methods(["POST"])
 def ingest_zip_view(request: HttpRequest):
-    """
-    Recebe um arquivo .zip (campo 'zip_file'), extrai e salva no banco.
-    """
+    """Recebe um arquivo .zip (campo 'zip_file'), extrai e salva no banco."""
     zip_file = request.FILES.get("zip_file")
     if not zip_file:
         return JsonResponse({"error": "Envie o arquivo .zip (campo zip_file)."}, status=400)
 
     try:
         with tempfile.TemporaryDirectory() as tmp_dir:
-            # Salvar o upload em um arquivo temporário para o ZipFile ler
+            # Salvar o upload em um arquivo temporário
             temp_zip_path = os.path.join(tmp_dir, 'upload.zip')
             with open(temp_zip_path, 'wb+') as destination:
                 for chunk in zip_file.chunks():
                     destination.write(chunk)
 
-            # Extrair
             with zipfile.ZipFile(temp_zip_path, 'r') as zip_ref:
                 zip_ref.extractall(tmp_dir)
 
-            # Localizar prova.json
             json_path = None
             base_extract_path = tmp_dir
             for root, dirs, files in os.walk(tmp_dir):
@@ -132,9 +115,9 @@ def ingest_zip_view(request: HttpRequest):
             
             if "error" in result:
                 return JsonResponse(result, status=400)
-                
+        
             return JsonResponse(result)
 
     except Exception as exc:
-        traceback.print_exc()
+        traceback.print_exc() 
         return JsonResponse({"error": str(exc)}, status=500)

@@ -1,8 +1,5 @@
 from django.contrib import admin
-from .models import (
-    StudySession, Answer, SubjectProgress,
-    Mission, UserMission
-)
+from .models import (StudySession, Answer, SubjectProgress,Mission, UserMission) 
 
 
 @admin.register(StudySession)

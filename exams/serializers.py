@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Exam, Question, Alternative, Attachment, QuestionAttachment
+from .models import Exam, Question, Alternative, Attachment
 
 
 class AttachmentSerializer(serializers.ModelSerializer):
@@ -41,7 +41,6 @@ class QuestionSerializer(serializers.ModelSerializer):
     def get_exam_name(self, obj):
         if not obj.exam or not obj.exam.name:
             return None
-        # Remove variações de " TÉCNICO" e o hífen " -"
         name = obj.exam.name.replace(" TÉCNICO", "").replace(" TECNICO", "").replace(" -", "")
         return name
 

@@ -441,7 +441,7 @@ function updateAttachmentField(idx, field, value) {
   const oldId = currentExamData.global_attachments[idx].id;
   currentExamData.global_attachments[idx][field] = value;
   
-  // Se mudar o ID, precisamos atualizar as referências nas questões
+  // Se mudar o ID, atualiza as referências nas questões
   if (field === 'id' && oldId !== value) {
     currentExamData.questions.forEach(q => {
       const attIdx = q.local_attachments.indexOf(oldId);

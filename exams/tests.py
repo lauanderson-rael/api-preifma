@@ -15,7 +15,7 @@ class ExamAPITest(APITestCase):
         )
         self.client.force_authenticate(user=self.user)
         self.exam = Exam.objects.create(name="Simulado IFMA", year=2023, type="integrado")
-        
+         
         # Criar 35 questões 
         for i in range(35):
             Question.objects.create(

@@ -1,17 +1,18 @@
+from datetime import date
 from django.db import transaction
 from django.db.models import Sum, Q
 from django.shortcuts import get_object_or_404
 from rest_framework import status, generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
+from rest_framework.views import APIView 
+from drf_spectacular.utils import extend_schema, extend_schema_view
 
 from exams.models import Alternative, Question
-from .models import (
-    Answer, Mission, StudySession,
-    SubjectProgress, UserMission, UserAIDailyUsage
-)
-from datetime import date
+from .models import (Answer, StudySession, SubjectProgress, UserMission, UserAIDailyUsage)
+from .services import get_or_create_daily_missions, xp_per_correct, get_or_generate_explanation
+from accounts.level_utils import level_progress
+
 from .serializers import (
     AnswerCreateSerializer,
     AnswerSerializer,
@@ -23,11 +24,8 @@ from .serializers import (
     UserMissionSerializer,
     DashboardSerializer,
 )
-from .services import get_or_create_daily_missions, xp_per_correct, get_or_generate_explanation
-from drf_spectacular.utils import extend_schema, extend_schema_view
-
+    
 # Sessions
-
 class SessionStartView(APIView):
     permission_classes = [IsAuthenticated]
     serializer_class = SessionStartSerializer
@@ -89,7 +87,6 @@ class SessionAnswerView(APIView):
         question = get_object_or_404(Question, pk=data['question_id'])
         alternative = get_object_or_404(Alternative, pk=data['alternative_id'], question=question)
 
-        # Snapshot do gabarito no momento da resposta
         correct_alt = question.alternatives.filter(is_correct=True).first()
         correct_letter = correct_alt.letter if correct_alt else ''
         is_correct = alternative.is_correct
@@ -152,8 +149,7 @@ class SessionFinishView(APIView):
             user.xp += xp_gained
             user.save(update_fields=['xp'])
 
-            # Cálculo de estatísticas por matéria para missões inteligentes
-            stats_by_subject = {} # {'matematica': {'total': 0, 'correct': 0}, ...}
+            stats_by_subject = {}
 
             for ans in answers.select_related('question'):
                 subj = ans.question.subject
@@ -164,25 +160,22 @@ class SessionFinishView(APIView):
                 if ans.is_correct:
                     stats_by_subject[subj]['correct'] += 1
 
-                # Atualiza o progresso global do usuário por matéria (SubjectProgress)
+                # Atualiza o progresso do usuário  
                 sp, _ = SubjectProgress.objects.get_or_create(user=user, subject=subj)
                 sp.questions_answered += 1
                 if ans.is_correct:
                     sp.correct_answers += 1
                 sp.save()
 
-            # Atualização Inteligente de Missões do Dia
-            from datetime import date
             today = date.today()
             daily_missions = UserMission.objects.filter(user=user, date=today).select_related('mission')
             missions_updated = []
 
-            for um in daily_missions:
+            # Atualização Inteligente de Missões
+            for um in daily_missions: 
                 if um.completed:
                     continue
-                
                 mission = um.mission
-                # Define qual valor usar: o total da sessão ou apenas o da matéria específica
                 if mission.goal_subject:
                     subj_stats = stats_by_subject.get(mission.goal_subject, {'total': 0, 'correct': 0})
                     session_total = subj_stats['total']
@@ -191,7 +184,6 @@ class SessionFinishView(APIView):
                     session_total = total
                     session_correct = correct_count
 
-                # Aplica o progresso baseado no tipo de meta
                 if mission.goal_type == 'answer_questions':
                     um.progress = min(um.progress + session_total, mission.goal_value)
                 elif mission.goal_type == 'correct_answers':
@@ -259,13 +251,11 @@ class MissionClaimView(APIView):
 
     @extend_schema(summary="Reivindicar XP de missão")
     def post(self, request, pk):
-        """POST /api/missions/{id}/claim/ — reivindica XP de missão completada (idempotente)."""
+        """POST /api/missions/{id}/claim/ — reivindica XP de missão completada."""
         user = request.user
-        
-        # Busca o registro da missão diária pelo ID (o frontend envia o ID do UserMission)
         um = get_object_or_404(UserMission, pk=pk, user=user)
 
-        if not um.completed:
+        if not um.completed: 
             return Response(
                 {'detail': 'Missão ainda não completada.'},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -279,7 +269,7 @@ class MissionClaimView(APIView):
         xp = um.mission.xp_reward
         request.user.xp += xp
         
-        # Lógica de Recompensa Especial (Bônus de IA temporário)
+        # Lógica de Recompensa Especial de IA 
         bonus_msg = ""
         if um.mission.special_reward == "AI_LIMIT":
             from .models import UserAIDailyUsage
@@ -310,25 +300,14 @@ class DashboardView(APIView):
     @extend_schema(summary="Dashboard inicial")
     def get(self, request):
         """GET /api/dashboard/ — dados agregados para a tela inicial."""
-        from datetime import date
-        today = date.today()
         user = request.user
-
-        from .services import get_or_create_daily_missions
-        from accounts.level_utils import level_progress
-        
         daily_missions = get_or_create_daily_missions(user)
-       
-        recent_sessions = StudySession.objects.filter(
-            user=user, finished=True
-        ).order_by('-created_at')[:3]
-
-       
+        
+        recent_sessions = StudySession.objects.filter(user=user, finished=True).order_by('-created_at')[:3]
         subject_progress = SubjectProgress.objects.filter(user=user)
-        # Informações de cota de IA
+
         today = date.today()
         ai_usage_obj, _ = UserAIDailyUsage.objects.get_or_create(user=user, date=today)
-
         level_data = level_progress(user.xp)
 
         return Response({
@@ -341,7 +320,7 @@ class DashboardView(APIView):
                 'used': ai_usage_obj.count,
                 'limit': user.ai_daily_limit + ai_usage_obj.bonus_limit,
                 'remaining': max(0, (user.ai_daily_limit + ai_usage_obj.bonus_limit) - ai_usage_obj.count)
-            }
+            } 
         })
 
 

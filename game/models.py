@@ -1,8 +1,6 @@
 from django.db import models
 from accounts.models import User
-from exams.models import Question, Alternative
-
-# Game & Sessão (Progresso Baseado em %)
+from exams.models import Question, Alternative 
 
 class StudySession(models.Model):
     SESSION_TYPES = [

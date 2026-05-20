@@ -50,7 +50,6 @@ class Question(models.Model):
     subject = models.CharField(max_length=20, choices=SUBJECT_CHOICES)
     statement = models.TextField()
 
-    # Relacionamento M2M unificado com a biblioteca de anexos
     attachments = models.ManyToManyField(Attachment, through='QuestionAttachment', related_name='questions')
 
     def __str__(self):

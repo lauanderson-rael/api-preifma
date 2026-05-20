@@ -4,12 +4,12 @@ import re
 import json
 import requests
 import fitz        
-from typing import Optional, Union
-from django.conf import settings  
 import requests
+from typing import Optional
+from django.conf import settings 
 from PIL import Image
 
-# 1. Processamento de PDFs e integração com Gemini 
+# 1. Processamento de PDFs e integração com Gemini
 class PageData:
     def __init__(self, text: str, image_b64: str, width: int, height: int):
         self.text = text
@@ -118,7 +118,7 @@ Retorne APENAS o JSON puro, sem markdown (sem ```json), sem explicações adicio
 """
 
 def _call_openrouter(prompt: str, pages: list[PageData], api_key: str) -> str:
-    """Chamada para o OpenRouter (estilo OpenAI)"""
+    """Chamada para o OpenRouter"""
     url = "https://openrouter.ai/api/v1/chat/completions"
     headers = {
         "Authorization": f"Bearer {api_key}",
@@ -162,8 +162,6 @@ def transform_exam_to_json(pages: list[PageData], answer_key_text: Optional[str]
     prompt_text = _PROMPT + f"\n\nGABARITO: {answer_key_text if answer_key_text else 'Não fornecido'}\n\nCONTEÚDO:\n{full_text}"
     
     raw_text = _call_openrouter(prompt_text, pages, api_key)
-    
-    # Limpeza básica caso o modelo ignore a instrução de "sem markdown"
     clean_json = re.sub(r'```json\s*|\s*```', '', raw_text).strip()
     try:
         return json.loads(clean_json)
@@ -199,25 +197,15 @@ def process_visual_captures_in_json(data: dict, pages: list[PageData]) -> dict:
 
     return process_item(data)
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# 2. Pipeline Completo (PDF → JSON)
-# ─────────────────────────────────────────────────────────────────────────────
-
+# 2. Pipeline Completo (PDF -> JSON)
 def run_pipeline(exam_bytes: bytes, answer_key_bytes: Optional[bytes] = None, api_key: str = "") -> dict:
     pages = process_pdf(exam_bytes)
     ak_text = "\n".join(p.text for p in process_pdf(answer_key_bytes)) if answer_key_bytes else None
-    
-    # Agora retorna um DICT (JSON estruturado)
-    exam_json = transform_exam_to_json(pages, ak_text, api_key)
-    
+    exam_json = transform_exam_to_json(pages, ak_text, api_key) 
     return process_visual_captures_in_json(exam_json, pages)
 
 
 def generate_question_explanation(question_text: str, alternatives: list, correct_letter: str, api_key: str, images_b64: list = None) -> str:
-    """Usa a IA para gerar uma explicação didática para a questão, incluindo imagens se houver."""
-    import json
-    
     prompt = f"""
     Explique de forma curta e direta apenas por que a alternativa {correct_letter} é a correta para esta questão.
     
