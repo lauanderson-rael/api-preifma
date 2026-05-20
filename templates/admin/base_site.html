@@ -4,6 +4,10 @@
 <h1 id="site-name"><a href="{% url 'admin:index' %}">Pré-IFMA Admin</a></h1>
 {% endblock %}
 
+{% block userlinks %}
+<a href="/parser/"><strong>Acessar Parser</strong></a> / {{ block.super }}
+{% endblock %}
+
 {% block extrastyle %}
 {{ block.super }}
 <style>
