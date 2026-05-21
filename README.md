@@ -18,8 +18,8 @@ A **PREIFMA API** é o coração do ecossistema PreIFMA — uma plataforma gamif
 
 ### 1. Clonar o Repositório
 ```bash
-git clone git@github.com:lauanderson-rael/preifma_api.git
-cd preifma_api
+git clone git@github.com:lauanderson-rael/api-preifma.git
+cd api-preifma
 ```
 
 ### 2. Variáveis de Ambiente
@@ -72,6 +72,30 @@ Onde testar:
 * Admin: http://localhost:8000/admin/
 * Parser: http://localhost:8000/parser/ 
 ---
+
+### Como Testar o Parser de Provas e Gabaritos
+
+A plataforma disponibiliza uma interface visual amigável (Web UI) para que o administrador possa acompanhar todo o fluxo de ingestão, realizar correções de qualidade e homologar os dados das provas e gabaritos extraídos por IA.
+ 
+#### Passo 1: Ingestão de Prova via PDF
+1. Certifique-se de que os contêineres estão rodando localmente (`docker compose up -d`).
+2. Acesse a interface do Parser em seu navegador: **`http://localhost:8000/parser/`**.
+3. Realize o login com as credenciais de **Administrador** (`admin@preifma.com` / `admin123`).
+4. Na tela de processamento, realize o upload dos arquivos de amostra fornecidos diretamente na **raiz do repositório**:
+   * **`prova_pdf`**: Faça o upload do arquivo contido em `2025-prova-integrado.pdf`.
+   * **`gabarito_pdf`**: Faça o upload do arquivo contido em `2025-gabarito-integrado.pdf`. 
+5. Clique em **"Começar Processamento"**. 
+ 
+#### Passo 2: Interface de Edição e Curadoria Humana
+Após o processamento concluído, o sistema redirecionará você para a **Interface de Revisão Curatorial**:
+* **Correção Tipográfica:** Navegue pelas 30 questões capturadas pela IA e edite diretamente na tela enunciados, alternativas ou gabaritos se desejar fazer correções gramaticais.
+* **Ajuste Fino de Imagens:** Visualize as mídias de apoio (diagramas, tabelas) recortadas fisicamente. Se desejar refinar o enquadramento, altere as coordenadas delimitadoras diretamente e visualize o recorte instantaneamente.
+
+#### Passo 3: Publicação ou Exportação  
+Após homologar a revisão: 
+* **Persistir Direto no Banco:** Clique em **"Salvar no Banco de Dados"** para persistir as tabelas via Django ORM. As questões estarão disponíveis instantaneamente no aplicativo React Native móvel para os alunos!
+* **Exportar Pacote (Portabilidade):** Clique em **"Exportar como ZIP"** para baixar o pacote portátil estruturado contendo o `prova.json` e a pasta `images/`. Este arquivo ZIP poderá ser reimportado futuramente de forma instantânea através da opção **"Importação Rápida via ZIP"** (sem custos IA).
+
 
 ## 📡 Principais Endpoints (Resumo)
 
