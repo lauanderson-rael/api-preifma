@@ -78,6 +78,40 @@ async function handleZipUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
 
+  try {
+    const zip = await JSZip.loadAsync(file);
+    const fileNames = Object.keys(zip.files);
+
+    const provaEntry = fileNames.find((name) => {
+      const normalized = name.replace(/\\/g, '/').replace(/\/$/, '');
+      const parts = normalized.split('/');
+      return parts[parts.length - 1] === 'prova.json';
+    });
+
+    const provaDir = provaEntry ? provaEntry.replace(/\\/g, '/').replace(/\/$/, '').split('/').slice(0, -1).join('/') : '';
+    const imagesPrefix = provaDir ? `${provaDir}/images/` : 'images/';
+    const hasImagesFolder = fileNames.some((name) => {
+      const normalized = name.replace(/\\/g, '/');
+      return normalized.startsWith(imagesPrefix);
+    });
+
+    if (!provaEntry) {
+      alert('Erro: o ZIP precisa conter o arquivo prova.json.');
+      e.target.value = '';
+      return;
+    }
+
+    if (!hasImagesFolder) {
+      alert('Erro: o ZIP precisa conter a pasta images/ no mesmo nível de prova.json.');
+      e.target.value = '';
+      return;
+    }
+  } catch (err) {
+    alert('Erro ao ler o ZIP: ' + err.message);
+    e.target.value = '';
+    return;
+  }
+
   if (!confirm(`Deseja importar o ZIP "${file.name}" diretamente para o banco?`)) return;
 
   showState('processing');

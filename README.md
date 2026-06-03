@@ -76,25 +76,21 @@ Onde testar:
 ### Como Testar o Parser de Provas e Gabaritos
 
 A plataforma disponibiliza uma interface visual amigável (Web UI) para que o administrador possa acompanhar todo o fluxo de ingestão, realizar correções de qualidade e homologar os dados das provas e gabaritos extraídos por IA.
- 
-#### Passo 1: Ingestão de Prova via PDF
+
+#### 1. Importação via ZIP
+Use o arquivo `zip-exemplo-2025-integrado.zip` disponível na raiz do projeto para testar a importação rápida.
 1. Certifique-se de que os contêineres estão rodando localmente (`docker compose up -d`).
 2. Acesse a interface do Parser em seu navegador: **`http://localhost:8000/parser/`**.
 3. Realize o login com as credenciais de **Administrador** (`admin@preifma.com` / `admin123`).
-4. Na tela de processamento, realize o upload dos arquivos de amostra fornecidos diretamente na **raiz do repositório**:
-   * **`prova_pdf`**: Faça o upload do arquivo contido em `2025-prova-integrado.pdf`.
-   * **`gabarito_pdf`**: Faça o upload do arquivo contido em `2025-gabarito-integrado.pdf`. 
-5. Clique em **"Começar Processamento"**. 
- 
-#### Passo 2: Interface de Edição e Curadoria Humana
-Após o processamento concluído, o sistema redirecionará você para a **Interface de Revisão Curatorial**:
-* **Correção Tipográfica:** Navegue pelas 30 questões capturadas pela IA e edite diretamente na tela enunciados, alternativas ou gabaritos se desejar fazer correções gramaticais.
-* **Ajuste Fino de Imagens:** Visualize as mídias de apoio (diagramas, tabelas) recortadas fisicamente. Se desejar refinar o enquadramento, altere as coordenadas delimitadoras diretamente e visualize o recorte instantaneamente.
+4. Na tela do parser, clica na opcao "Clique para enviar arquivo .ZIP processado
+" selecione o arquivo zip, da raiz do projeto, e confirma. Após isso sera salvo no banco
 
-#### Passo 3: Publicação ou Exportação  
-Após homologar a revisão: 
-* **Persistir Direto no Banco:** Clique em **"Salvar no Banco de Dados"** para persistir as tabelas via Django ORM. As questões estarão disponíveis instantaneamente no aplicativo React Native móvel para os alunos!
-* **Exportar Pacote (Portabilidade):** Clique em **"Exportar como ZIP"** para baixar o pacote portátil estruturado contendo o `prova.json` e a pasta `images/`. Este arquivo ZIP poderá ser reimportado futuramente de forma instantânea através da opção **"Importação Rápida via ZIP"** (sem custos IA).
+#### 2. Ingestão de Prova via PDF (IA)
+1. Na tela do Parser, no campos de "PDF da Prova" e "PDF do Gabarito", faça o upload dos arquivos de amostra disponíveis na raiz do repositório:
+   * **`prova_pdf`**: `2025-prova-integrado.pdf`
+   * **`gabarito_pdf`**: `2025-gabarito-integrado.pdf`
+2. Clique em **"Começar Processamento"**.
+3. Após revisar as questões, clique em **"Salvar no Banco de Dados"** ou **"Exportar como ZIP"**.
 
 
 ## 📡 Principais Endpoints (Resumo)

@@ -6,6 +6,24 @@ from typing import Optional, Union
 from django.core.files.base import ContentFile
 from exams.models import Exam, Question, Alternative, Attachment, QuestionAttachment
 
+
+def zip_package_has_images_folder(zip_path: str) -> bool:
+    """Retorna True quando o ZIP contém uma pasta `images/` com pelo menos um arquivo."""
+    try:
+        import zipfile
+
+        with zipfile.ZipFile(zip_path, "r") as zip_ref:
+            for name in zip_ref.namelist():
+                normalized = name.replace("\\", "/").strip("/")
+                if not normalized or normalized.endswith("/"):
+                    continue
+                parts = normalized.split("/")
+                if "images" in parts[:-1]:
+                    return True
+            return False
+    except Exception:
+        return False
+
 def save_exam_to_db(data: Union[dict, str], default_year: Optional[int] = None, base_path: Optional[str] = None) -> dict:
     """Salva uma prova no banco de dados a partir de JSON estruturado."""
     json_data = None

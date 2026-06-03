@@ -73,6 +73,11 @@ class ExamAdmin(admin.ModelAdmin):
                             self.message_user(request, "Erro: Arquivo prova.json não encontrado dentro do ZIP.", level=messages.ERROR)
                             return HttpResponseRedirect("../")
 
+                        images_path = os.path.join(base_extract_path, "images")
+                        if not os.path.isdir(images_path):
+                            self.message_user(request, "Erro: A pasta images/ não foi encontrada no mesmo nível de prova.json.", level=messages.ERROR)
+                            return HttpResponseRedirect("../")
+
                         with open(json_path, 'r', encoding='utf-8') as f:
                             data = json.load(f)
 

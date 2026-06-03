@@ -197,6 +197,60 @@ def process_visual_captures_in_json(data: dict, pages: list[PageData]) -> dict:
 
     return process_item(data)
 
+def validate_pdf_content(pdf_bytes: bytes, is_answer_key: bool = False) -> tuple[bool, str, Optional[str]]:
+    """
+    Valida se o PDF enviado é realmente uma prova ou um gabarito do IFMA.
+    Retorna (True, "", modality) se for válido, ou (False, "mensagem de erro", None) caso contrário.
+    """
+    try:
+        doc = fitz.open(stream=pdf_bytes, filetype="pdf")
+        page_count = len(doc)
+        if page_count == 0:
+            doc.close()
+            return False, "O arquivo PDF está vazio ou corrompido.", None
+        
+        # Extrai o texto das 2 primeiras páginas
+        text = ""
+        for page in doc[:2]:
+            text += page.get_text("text") or ""
+        doc.close()
+        
+        text_lower = text.lower().strip()
+        if not text_lower:
+            return False, "O arquivo PDF não contém texto extraível (pode ser um PDF escaneado sem OCR ou um arquivo de imagem pura).", None
+            
+        # Detecta a modalidade
+        modality = None
+        if "integrado" in text_lower or "integrada" in text_lower:
+            modality = "INTEGRADO"
+        elif "concomitante" in text_lower or "concimitante" in text_lower:
+            modality = "CONCOMITANTE"
+        elif "subsequente" in text_lower or "subsequnete" in text_lower:
+            modality = "SUBSEQUENTE"
+
+        if is_answer_key:
+            # 1. Gabarito deve ser um documento curto (normalmente 1 a 3 páginas, limite seguro de 4)
+            if page_count > 4:
+                return False, f"O arquivo enviado como gabarito possui {page_count} páginas. Um gabarito oficial deve conter no máximo 4 páginas.", None
+                
+            # 2. Gabarito deve conter a palavra-chave "gabarito"
+            if "gabarito" not in text_lower:
+                return False, "O arquivo enviado no campo do gabarito não é válido (palavra-chave 'gabarito' não encontrada).", None
+        else:
+            # 1. Prova deve ser um caderno de provas completo (pelo menos 7 páginas)
+            if page_count < 7:
+                return False, f"O arquivo enviado como prova possui apenas {page_count} página(s). Uma prova completa deve conter entre 7 a 18 páginas.", None
+
+            # 2. Prova deve conter termos válidos de um caderno de provas
+            keywords = ["prova", "seletivo", "processo seletivo", "caderno de provas", "questões", "edital", "ifma"]
+            if not any(k in text_lower for k in keywords):
+                return False, "A prova enviada não contém termos válidos de um caderno de provas (como 'prova', 'seletivo', 'edital' ou 'ifma').", None
+                
+        return True, "", modality
+    except Exception as e:
+        return False, f"Erro ao analisar a estrutura do arquivo PDF: {str(e)}", None
+
+
 # 2. Pipeline Completo (PDF -> JSON)
 def run_pipeline(exam_bytes: bytes, answer_key_bytes: Optional[bytes] = None, api_key: str = "") -> dict:
     pages = process_pdf(exam_bytes)

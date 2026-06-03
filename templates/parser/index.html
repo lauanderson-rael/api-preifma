@@ -5,7 +5,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRE-IFMA Parser | Estruturador de Provas</title>
+  <title>PRÉ-IFMA Parser | Estruturador de Provas</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -134,36 +134,39 @@
 <body class="min-h-screen">
   <!-- Header -->
   <header class="sticky top-0 z-40 w-full border-b bg-[#198754] backdrop-blur-md">
-    <div class="container mx-auto px-4 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-3">
+    <div class="container mx-auto px-4 py-3 sm:h-16 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-6">
+      <div class="flex items-center justify-between gap-3 w-full sm:w-auto">
+        <div class="flex items-center gap-3 min-w-0">
         <!-- <div class="bg-[#198754] p-2 rounded-xl text-white shadow-lg shadow-green-200">
           <i data-lucide="file-text" class="w-6 h-6"></i>
         </div> -->
-        <div>
-          <h1 class="font-bold text-lg text-white leading-tight">PRE-IFMA Parser</h1>
+          <div>
+          <h1 class="font-bold text-base sm:text-lg text-white leading-tight">PRÉ-IFMA Parser</h1>
           <!-- <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Estruturador Inteligente de Provas
             do IFMA</p> -->
+          </div>
         </div>
       </div>
-      <div class="flex items-center gap-6">
-        <div class="flex items-center gap-4 border-r border-white/20 pr-6">
+      <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 w-full sm:w-auto">
+        <div class="grid grid-cols-3 gap-2 w-full sm:flex sm:items-center sm:gap-4 border-none sm:border-r border-white/20 sm:pr-6">
           <a href="/"
-            class="text-white hover:text-green-200 flex items-center gap-2 text-sm font-semibold transition-colors">
+            class="text-white hover:text-green-200 flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold transition-colors rounded-lg bg-white/10 sm:bg-transparent px-3 py-2 sm:px-0 sm:py-0 whitespace-nowrap">
             <i data-lucide="globe" class="w-4 h-4"></i>
-            Ver o Site
+            <span>Ver o Site</span>
           </a>
           <a href="/admin/"
-            class="text-white hover:text-green-200 flex items-center gap-2 text-sm font-semibold transition-colors">
+            class="text-white hover:text-green-200 flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold transition-colors rounded-lg bg-white/10 sm:bg-transparent px-3 py-2 sm:px-0 sm:py-0 whitespace-nowrap">
             <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
-            Admin
+            <span>Admin</span>
           </a>
           <a href="/admin/logout/"
-            class="text-white hover:text-red-200 flex items-center gap-2 text-sm font-semibold transition-colors">
+            onclick="return confirm('Tem certeza que deseja sair do sistema?')"
+            class="text-white hover:text-red-200 flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold transition-colors rounded-lg bg-white/10 sm:bg-transparent px-3 py-2 sm:px-0 sm:py-0 whitespace-nowrap">
             <i data-lucide="log-out" class="w-4 h-4"></i>
-            Sair
+            <span>Sair</span>
           </a>
         </div>
-        <div class="flex items-center gap-3" id="header-actions">
+        <div class="flex items-center justify-center sm:justify-end gap-3 w-full sm:w-auto" id="header-actions">
           <!-- Actions show up here when results are ready -->
         </div>
       </div>
@@ -178,11 +181,11 @@
         <div class="lg:col-span-8 space-y-8">
           <div class="text-left space-y-2">
             <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Estruturador Inteligente de Provas</h2>
-            <p class="text-slate-500">Transforme PDFs de provas do IFMA em JSON estruturado com IA.</p>
+            <p class="text-slate-500">Transforme PDFs de provas e gabaritos do IFMA em JSON estruturado com IA.</p>
           </div>
 
           <!-- ZIP Import Option -->
-          <div class="card p-6 border-2 border-dashed border-green-200 bg-green-50/30">
+          <div class="card p-4 border-2 border-dashed border-green-200 bg-green-50/30">
             <div class="flex items-center gap-3 mb-4">
               <div class="bg-green-100 p-2 rounded-lg text-green-700">
                 <i data-lucide="package" class="w-5 h-5"></i>
@@ -204,7 +207,7 @@
           </div>
 
           <!-- AI Processing Setup -->
-          <div class="card p-8 space-y-6 shadow-2xl shadow-slate-200">
+          <div class="card p-4 space-y-6 shadow-2xl shadow-slate-200">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div class="space-y-2">
                 <label class="text-xs font-black text-slate-400 uppercase tracking-widest block">1. Arquivo da
@@ -252,21 +255,20 @@
 
         <!-- Sidebar (Right) -->
         <aside class="lg:col-span-4 space-y-6">
-          <div class="card p-6 h-full flex flex-col">
+          <div class="card p-4 h-full flex flex-col">
             <div class="flex items-center gap-3 mb-6">
               <div class="bg-green-100 p-2 rounded-lg text-green-700">
                 <i data-lucide="database" class="w-5 h-5"></i>
               </div>
               <h3 class="font-bold text-slate-800 flex items-center gap-2">
-                Provas no Banco
-
+                Provas Cadastradas
               </h3>
             </div>
 
             <div class="flex-1 overflow-y-auto custom-scrollbar space-y-3 max-h-[70vh] pr-2">
               {% for exam in exams %}
               <div
-                class="p-3 rounded-lg border border-slate-100 bg-slate-50 hover:bg-white hover:shadow-md transition-all group">
+                class="p-3 rounded-lg border border-slate-100 bg-slate-50 hover:bg-green-100 hover:shadow-md transition-all group">
                 <div class="flex justify-between items-start mb-1">
                   <a href="/admin/exams/exam/{{ exam.id }}/change/" target="_blank"
                     class="text-slate-400 hover:text-green-600">
@@ -451,17 +453,17 @@
   </main>
   <!-- Footer Actions (Sticky bottom on editor) -->
   <div id="editor-footer" class="hidden fixed bottom-0 left-0 right-0 bg-white border-t p-4 z-40 shadow-2xl">
-    <div class="container mx-auto flex items-center justify-between">
-      <div class="flex items-center gap-4">
-        <button onclick="resetApp()" class="text-slate-500 font-bold text-sm hover:text-slate-800">DESCARTAR</button>
+    <div class="container mx-auto flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div class="flex items-center justify-center sm:justify-start gap-4">
+        <button onclick="resetApp()" class="text-slate-500 font-bold text-sm hover:text-slate-800 px-3 py-2 rounded-lg hover:bg-slate-100">DESCARTAR</button>
       </div>
-      <div class="flex items-center gap-4">
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
         <button onclick="exportZip()"
-          class="flex items-center gap-2 px-6 py-3 bg-slate-100 text-slate-900 rounded-xl font-black text-sm hover:bg-slate-200">
+          class="flex items-center justify-center gap-2 px-6 py-3 bg-slate-100 text-slate-900 rounded-xl font-black text-sm hover:bg-slate-200 w-full sm:w-auto">
           <i data-lucide="download" class="w-4 h-4"></i> EXPORTAR .ZIP
         </button>
         <button onclick="saveToDatabase()" id="btn-save-db"
-          class="flex items-center gap-2 px-8 py-3 bg-[#198754] text-white rounded-xl font-black text-sm shadow-lg shadow-green-100 hover:bg-green-800">
+          class="flex items-center justify-center gap-2 px-8 py-3 bg-[#198754] text-white rounded-xl font-black text-sm shadow-lg shadow-green-100 hover:bg-green-800 w-full sm:w-auto">
           <i data-lucide="database" class="w-4 h-4"></i> SALVAR NO BANCO
         </button>
       </div>

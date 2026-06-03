@@ -12,7 +12,7 @@ from exams.models import Exam
 from exams.services import save_exam_to_db
 from django.contrib.admin.views.decorators import staff_member_required
 
-from .services import run_pipeline
+from .services import run_pipeline, validate_pdf_content
 
 def landing(request: HttpRequest):
     return render(request, "landing.html")
@@ -45,7 +45,22 @@ def process(request: HttpRequest):
 
     try:
         exam_bytes = exam_file.read()
-        answer_key_bytes = answer_key_file.read() if answer_key_file else None
+        is_valid_exam, exam_error, exam_modality = validate_pdf_content(exam_bytes, is_answer_key=False)
+        if not is_valid_exam:
+            return JsonResponse({"error": exam_error}, status=400)
+
+        answer_key_bytes = None
+        if answer_key_file:
+            answer_key_bytes = answer_key_file.read()
+            is_valid_ak, ak_error, ak_modality = validate_pdf_content(answer_key_bytes, is_answer_key=True)
+            if not is_valid_ak:
+                return JsonResponse({"error": ak_error}, status=400)
+            
+            # Validação cruzada de modalidade para evitar upload trocado
+            if exam_modality and ak_modality and exam_modality != ak_modality:
+                return JsonResponse({
+                    "error": f"Incompatibilidade detectada: a prova enviada é da modalidade '{exam_modality}', mas o gabarito enviado é da modalidade '{ak_modality}'."
+                }, status=400)
 
         exam_json = run_pipeline(exam_bytes, answer_key_bytes, api_key=api_key)
         return JsonResponse(exam_json)
@@ -107,6 +122,10 @@ def ingest_zip_view(request: HttpRequest):
 
             if not json_path:
                 return JsonResponse({"error": "Arquivo prova.json não encontrado dentro do ZIP."}, status=400)
+
+            images_path = os.path.join(base_extract_path, "images")
+            if not os.path.isdir(images_path):
+                return JsonResponse({"error": "A pasta images/ não foi encontrada no mesmo nível de prova.json."}, status=400)
 
             with open(json_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
