@@ -32,3 +32,5 @@ comands.md
 
 # outros 
 DEPLOY_SERVER.md 
+.scannerwork/
+sonar-project.properties

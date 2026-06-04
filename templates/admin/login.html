@@ -59,6 +59,15 @@ body.login #content > h1 {
     margin-bottom: 6px;
   }
 
+  h2 {
+    text-align: center;
+    color: var(--text);
+    -webkit-text-fill-color: var(--text);
+    opacity: 1;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
   .subtitle {
     text-align: center;
     font-size: .9rem;
@@ -310,6 +319,13 @@ body.login #content > h1 {
       toggle.setAttribute('aria-pressed', String(!isVisible));
       toggle.setAttribute('aria-label', isVisible ? 'Mostrar senha' : 'Esconder senha');
     });
-  })();
+  
+    document.querySelectorAll('#login-form input').forEach(el => {
+      el.addEventListener('focus', () => {
+        setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
+      });
+    });
+  })(); 
+
 </script>
 {% endblock %}
