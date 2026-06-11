@@ -2,6 +2,7 @@
 let currentExamData = null;
 let cropper = null;
 let currentCroppingId = null;
+let progressInterval = null;
 
 // --- INIT ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -49,13 +50,15 @@ async function startProcessing() {
   if (!examFile) return;
 
   showState('processing');
+  updateProcessingStatus('Processando prova...', 10, 'Isso pode levar cerca de 1 a 2 minutos.');
+  animateProgressBar(90, 20000); // Sobe até 90% em 20s
+
   const formData = new FormData();
   formData.append('exam_pdf', examFile);
   if (keyFile) formData.append('answer_key_pdf', keyFile);
   if (apiKey) formData.append('api_key_override', apiKey);
 
   try {
-    updateProcessingStatus('Iniciando análise...', 10);
     const response = await fetch('/parser/process/', {
       method: 'POST',
       body: formData
@@ -67,8 +70,12 @@ async function startProcessing() {
     }
 
     currentExamData = await response.json();
-    loadEditor();
+    completeProgressBar();
+    setTimeout(() => {
+      loadEditor();
+    }, 300);
   } catch (err) {
+    if (progressInterval) clearInterval(progressInterval);
     alert('Erro: ' + err.message);
     showState('setup');
   }
@@ -115,7 +122,8 @@ async function handleZipUpload(e) {
   if (!confirm(`Deseja importar o ZIP "${file.name}" diretamente para o banco?`)) return;
 
   showState('processing');
-  updateProcessingStatus('Importando ZIP...', 50);
+  updateProcessingStatus('Importando ZIP...', 10, 'Importando dados...');
+  animateProgressBar(90, 2000); // Sobe até 90% em 2s para o ZIP
 
   const formData = new FormData();
   formData.append('zip_file', file);
@@ -132,9 +140,13 @@ async function handleZipUpload(e) {
     }
 
     const result = await response.json();
-    alert(`Sucesso! ${result.saved} questões importadas.`);
-    location.reload();
+    completeProgressBar();
+    setTimeout(() => {
+      alert(`Sucesso! ${result.saved} questões importadas.`);
+      location.reload();
+    }, 300);
   } catch (err) {
+    if (progressInterval) clearInterval(progressInterval);
     alert('Erro: ' + err.message);
     showState('setup');
   }
@@ -457,11 +469,44 @@ function showState(state) {
   }
 }
 
-function updateProcessingStatus(text, progress) {
+function updateProcessingStatus(text, progress, subtitleText = '') {
   const title = document.getElementById('processing-title');
   const bar = document.getElementById('progress-bar');
+  const subtitle = document.getElementById('processing-subtitle');
   if (title) title.innerText = text;
   if (bar) bar.style.width = progress + '%';
+  if (subtitle) subtitle.innerText = subtitleText;
+}
+
+function animateProgressBar(targetPercent, durationMs) {
+  if (progressInterval) clearInterval(progressInterval);
+  
+  const bar = document.getElementById('progress-bar');
+  if (!bar) return;
+  
+  let current = 10;
+  bar.style.width = current + '%';
+  
+  const stepTime = 100; // atualiza a cada 100ms
+  const totalSteps = durationMs / stepTime;
+  const increment = (targetPercent - current) / totalSteps;
+  
+  progressInterval = setInterval(() => {
+    current += increment;
+    if (current >= targetPercent) {
+      current = targetPercent;
+      clearInterval(progressInterval);
+    }
+    bar.style.width = current + '%';
+  }, stepTime);
+}
+
+function completeProgressBar() {
+  if (progressInterval) clearInterval(progressInterval);
+  const bar = document.getElementById('progress-bar');
+  if (bar) {
+    bar.style.width = '100%';
+  }
 }
 
 function updateStats() {

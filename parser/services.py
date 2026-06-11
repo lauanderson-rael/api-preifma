@@ -293,7 +293,7 @@ def generate_question_explanation(question_text: str, alternatives: list, correc
             })
 
     payload = {
-        "model": getattr(settings, "OPENROUTER_EXPLAINER_MODEL", "google/gemini-2.0-flash-001"),
+        "model": getattr(settings, "OPENROUTER_EXPLAINER_MODEL", "google/gemini-3.1-flash-lite"),
         "messages": [{"role": "user", "content": content_list}],
         "temperature": 0.3, 
         "max_tokens": 400  

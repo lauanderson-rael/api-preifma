@@ -132,7 +132,7 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800
 
 OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY', '')
 OPENROUTER_PARSER_MODEL = os.environ.get('OPENROUTER_PARSER_MODEL', 'google/gemini-3-flash-preview')
-OPENROUTER_EXPLAINER_MODEL = os.environ.get('OPENROUTER_EXPLAINER_MODEL', 'google/gemini-2.0-flash-001')
+OPENROUTER_EXPLAINER_MODEL = os.environ.get('OPENROUTER_EXPLAINER_MODEL', 'google/gemini-3.1-flash-lite')
 OPENROUTER_SITE_URL = os.environ.get('OPENROUTER_SITE_URL', 'http://localhost:8000')
 
 # Configurações de E-mail (Resend via SMTP)

@@ -1,11 +1,16 @@
-# PREIFMA API
+# PRÉ-IFMA API
 
-A **PREIFMA API** é o coração do ecossistema PreIFMA — uma plataforma gamificada desenvolvida como TCC para auxiliar candidatos a ingressarem no Seletivo Técnico do IFMA. Esta API fornece todos os recursos necessários para o funcionamento do aplicativo móvel, desde a gestão de questões até o sistema de recompensas.
+<!-- A **PREIFMA API** é o coração do ecossistema PreIFMA — uma plataforma gamificada desenvolvida como TCC para auxiliar candidatos a ingressarem no Seletivo Técnico do IFMA. Esta API fornece todos os recursos necessários para o funcionamento do aplicativo móvel, desde a gestão de questões até o sistema de recompensas. -->
+ 
+A **Pré-IFMA API** é o backend da plataforma Pré-IFMA, responsável pelo processamento automatizado de provas e gabaritos do processo seletivo técnico do IFMA. A solução utiliza Inteligência Artificial multimodal para extrair questões, alternativas, gabaritos e elementos visuais de documentos PDF, convertendo essas informações em dados estruturados disponibilizados por meio de uma API REST.
+
+Além do pipeline de extração, a API também fornece recursos utilizados pelo aplicativo móvel da plataforma, incluindo simulados, acompanhamento de desempenho, gamificação e explicações geradas por IA.
+
 
 ## 🛠 Tecnologias Principais
 *   **Framework:** Django 5.x & Django REST Framework (DRF)
 *   **Banco de Dados:** PostgreSQL (via Docker)
-*   **IA & Parsing:** Google Gemini API, PyMuPDF (fitz) e BeautifulSoup
+*   **IA & Processamento de PDFs:** Google Gemini API, PyMuPDF (fitz) e BeautifulSoup
 *   **Autenticação:** JWT (Simple JWT)
 *   **Ambiente:** Python 3.12+
 
@@ -18,33 +23,52 @@ A **PREIFMA API** é o coração do ecossistema PreIFMA — uma plataforma gamif
 
 ### 1. Clonar o Repositório
 ```bash
-git clone git@github.com:lauanderson-rael/api-preifma.git
-cd api-preifma
+git clone https://github.com/lauanderson-rael/api-preifma.git
+cd api-preifma 
 ```
 
 ### 2. Variáveis de Ambiente
 Crie um arquivo `.env` na raiz do projeto seguindo este modelo:
 ```ini
+# Chave secreta do Django
+DJANGO_SECRET_KEY="gere_uma_chave_segura_aqui" 
+
 # Banco de Dados
-DB_NAME=preifma_db
+DB_NAME=preifma_db 
 DB_USER=preifma_user
 DB_PASSWORD=admin123
 DB_HOST=localhost
 DB_PORT=5432
 
-# OpenRouter (IA) 
-OPENROUTER_API_KEY=sua_chave_aqui
-OPENROUTER_PARSER_MODEL=nome_do_modelo
-OPENROUTER_EXPLAINER_MODEL=nome_do_modelo 
-OPENROUTER_SITE_URL=url_do_seu_site 
+# OpenRouter (para os recursos de IA)  
+OPENROUTER_API_KEY="sua_chave_openrouter_aqui" 
+OPENROUTER_PARSER_MODEL="google/gemini-3-flash-preview"
+OPENROUTER_EXPLAINER_MODEL="google/gemini-3.1-flash-lite"
+OPENROUTER_SITE_URL="http://localhost:8000"   
 
-# Resend (Serviço de Email) 
-RESEND_API_KEY=re_sua_chave_aqui 
+# Opcional - necessário para envio de e-mails 
+RESEND_API_KEY=sua_chave_resend_aqui
 DEFAULT_FROM_EMAIL="Pré-IFMA <onboarding@resend.dev>"
 ```
 
+### 🔑 Obtendo as Chaves de API
+
+#### OpenRouter (IA)
+
+1. Crie uma conta em https://openrouter.ai
+2. Acesse **API Keys**
+3. Gere uma nova API Key
+4. Adicione na variável: OPENROUTER_API_KEY
+
+#### Resend (Envio de e-mails)
+
+1. Crie uma conta em https://resend.com
+2. Acesse **API keys**
+3. Gere uma nova API Key 
+4. Adicione na variável: RESEND_API_KEY
+
 ### 3. 🐳 Instalação via Docker
-Se você tem o Docker instalado, pode subir o ambiente completo (API + Banco) com poucos comandos:
+Com o Docker instalado, você pode subir o ambiente completo (API + Banco) com poucos comandos:
 
 ```bash
 # 1. Subir os containers
@@ -129,11 +153,9 @@ Para integração com clientes ou consulta técnica:
 ### 3. Arquitetura de IA (OpenRouter)
 O sistema utiliza uma camada de abstração para modelos de linguagem através da **OpenRouter**, permitindo trocar o provedor de IA via `.env` sem alteração de código:
 - **Parser**: Otimizado para modelos de raciocínio (ex: `google/gemini-3-flash-preview`).
-- **Explicações**: Otimizado para modelos didáticos e econômicos (ex: `google/gemini-2.0-flash-001`).
+- **Explicações**: Otimizado para modelos didáticos e econômicos (ex: `google/gemini-3.1-flash-lite`).
 
 --- 
 
 ### 👨‍💻 Autor
 Desenvolvido por **Lauanderson Rael** como parte do Trabalho de Conclusão de Curso (TCC).
-
----
