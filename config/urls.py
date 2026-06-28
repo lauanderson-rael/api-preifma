@@ -7,6 +7,13 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, Spec
 from django_rest_passwordreset.views import ResetPasswordRequestToken, ResetPasswordConfirm, ResetPasswordValidateToken
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from parser.views import landing
+from django_rest_passwordreset.models import ResetPasswordToken
+
+# --- Remover ResetPasswordToken do djangoAdmin
+try:
+    admin.site.unregister(ResetPasswordToken)
+except admin.sites.NotRegistered:
+    pass
 
 class CustomResetPasswordRequestToken(ResetPasswordRequestToken):
     def post(self, request, *args, **kwargs):

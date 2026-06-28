@@ -6,10 +6,10 @@ class Attachment(models.Model):
         ('text', 'Texto de Apoio'), 
         ('image', 'Imagem'),
     ]
-    type = models.CharField(max_length=10, choices=TYPE_CHOICES)
-    label = models.CharField(max_length=100, blank=True, null=True, help_text="Ex: Texto 1, Trecho 2...")
-    content = models.TextField(blank=True, null=True, help_text="Usado se for tipo 'text'")
-    file = models.ImageField(upload_to='questions/', blank=True, null=True, help_text="Usado se for tipo 'image'")
+    type = models.CharField(max_length=10, choices=TYPE_CHOICES, verbose_name="Tipo de anexo")
+    label = models.CharField(max_length=100, blank=True, null=True,verbose_name="Rótulo", help_text="Ex: Texto 1, Trecho 2...")
+    content = models.TextField(blank=True, null=True, verbose_name="Conteúdo de Texto", help_text="Usado se for tipo 'text'")
+    file = models.ImageField(upload_to='questions/', blank=True, null=True, verbose_name="Arquivo de Imagem", help_text="Usado se for tipo 'image'")
     hash = models.CharField(max_length=64, unique=True)
 
     def __str__(self):
@@ -28,9 +28,9 @@ class Exam(models.Model):
         ('subsequente', 'Técnico Subsequente'),
         ('concomitante', 'Técnico Concomitante'),
     ]
-    name = models.CharField(max_length=200)
-    year = models.IntegerField()
-    type = models.CharField(max_length=20, choices=TYPE_CHOICES)
+    name = models.CharField(max_length=200, verbose_name="Nome")
+    year = models.IntegerField(verbose_name="Ano")
+    type = models.CharField(max_length=20, choices=TYPE_CHOICES, verbose_name="Tipo de Curso")
 
     def __str__(self):
         return self.name
@@ -45,12 +45,12 @@ class Question(models.Model):
         ('portugues', 'Português'),
         ('matematica', 'Matemática'),
     ]
-    exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name='questions')
-    number = models.IntegerField(default=0)
-    subject = models.CharField(max_length=20, choices=SUBJECT_CHOICES)
-    statement = models.TextField()
+    exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name='questions', verbose_name="Prova")
+    number = models.IntegerField(default=0, verbose_name="Número da Questão")
+    subject = models.CharField(max_length=20, choices=SUBJECT_CHOICES, verbose_name="Matéria")
+    statement = models.TextField(verbose_name="Enunciado da Questão")
 
-    attachments = models.ManyToManyField(Attachment, through='QuestionAttachment', related_name='questions')
+    attachments = models.ManyToManyField(Attachment(), through='QuestionAttachment', related_name='questions')
 
     def __str__(self):
         return f"Q{self.number} - {self.subject} ({self.exam.name})"
@@ -63,8 +63,8 @@ class Question(models.Model):
 class QuestionAttachment(models.Model):
     """Tabela de Ligação: Questão <-> Anexo (Mantém a ordem da prova)"""
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    attachment = models.ForeignKey(Attachment, on_delete=models.CASCADE)
-    order = models.IntegerField(default=1)
+    attachment = models.ForeignKey(Attachment,verbose_name="Anexo", on_delete=models.CASCADE)
+    order = models.IntegerField(default=1, verbose_name="Ordem")
 
     class Meta:
         ordering = ['order']
@@ -73,10 +73,10 @@ class QuestionAttachment(models.Model):
 
 
 class Alternative(models.Model):
-    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='alternatives')
-    letter = models.CharField(max_length=2)
-    text = models.TextField()
-    is_correct = models.BooleanField(default=False)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='alternatives', verbose_name="Questão")
+    letter = models.CharField(max_length=2, verbose_name="Letra")
+    text = models.TextField(verbose_name="Texto")
+    is_correct = models.BooleanField(default=False, verbose_name="Correta?")
 
     def __str__(self):
         return f"{self.letter}) {self.text[:30]}"

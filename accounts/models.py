@@ -20,18 +20,17 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    email = models.EmailField(unique=True)
+    email = models.EmailField(unique=True, verbose_name="Email")
     username = models.CharField(max_length=150, unique=True, blank=True, null=True)
-    name = models.CharField(max_length=120)
+    name = models.CharField(max_length=120, verbose_name="Nome")
     
-    # Campos de Gamificação conforme novo diagrama
     # Gamificação
-    xp = models.IntegerField(default=0)
-    ai_daily_limit = models.PositiveIntegerField(default=3, help_text="Limite de explicações por IA por dia")
+    xp = models.IntegerField(default=0, verbose_name="Pontuação de XP")
+    ai_daily_limit = models.PositiveIntegerField(default=3, verbose_name="Limite de diário de IA", help_text="Limite de explicações por IA por dia")
     
-    is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True, verbose_name="Ativo?")
+    is_staff = models.BooleanField(default=False, verbose_name="Membro Administrador?")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Cadastrado em")
 
     objects = UserManager()
 
