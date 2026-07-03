@@ -23,7 +23,7 @@ class CustomResetPasswordRequestToken(ResetPasswordRequestToken):
                 response.data['email'] = ["Não encontramos uma conta associada a este e-mail. Verifique se digitou corretamente."]
         return response
 
-admin.site.index_title = "Pré-IFMA"  
+admin.site.index_title = "Administração do Sistema"  
 
 urlpatterns = [
     path('admin/', admin.site.urls),
