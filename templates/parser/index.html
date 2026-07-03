@@ -134,17 +134,11 @@
 <body class="min-h-screen">
   <!-- Header -->
   <header class="sticky top-0 z-40 w-full border-b bg-[#198754] backdrop-blur-md">
-    <div
-      class="container mx-auto px-4 py-3 sm:h-16 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-6">
-      <div class="flex items-center justify-between gap-3 w-full sm:w-auto">
+    <div class="mx-auto px-12 py-3 sm:h-14 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-6">
+      <div class="flex items-center justify-center gap-3 w-full sm:w-auto">
         <div class="flex items-center gap-3 min-w-0">
-          <!-- <div class="bg-[#198754] p-2 rounded-xl text-white shadow-lg shadow-green-200">
-          <i data-lucide="file-text" class="w-6 h-6"></i>
-        </div> -->
           <div>
-            <h1 class="font-bold text-base sm:text-lg text-white leading-tight">PRÉ-IFMA Parser</h1>
-            <!-- <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Estruturador Inteligente de Provas
-            do IFMA</p> -->
+            <h1 class="sm:text-2xl text-2xl text-white leading-tight">PRÉ-IFMA Parser</h1>
           </div>
         </div>
       </div>
@@ -179,14 +173,14 @@
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
         <!-- Main Form (Left/Center) -->
-        <div class="lg:col-span-8 space-y-8">
+        <div class="lg:col-span-8 space-y-4">
           <div class="text-left space-y-2">
             <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Estruturador Inteligente de Provas</h2>
             <p class="text-slate-500">Transforme PDFs de provas e gabaritos do IFMA em JSON estruturado com IA.</p>
           </div>
 
           <!-- ZIP Import Option -->
-          <div class="card p-4 border-2 border-dashed border-green-200 bg-green-50/30">
+          <div class="card p-6 border-2 border-dashed border-green-200 bg-green-50/30">
             <div class="flex items-center gap-3 mb-4">
               <div class="bg-green-100 p-2 rounded-lg text-green-700">
                 <i data-lucide="package" class="w-5 h-5"></i>
@@ -194,8 +188,8 @@
               <h3 class="font-bold text-slate-800">Importação Rápida via ZIP</h3>
             </div>
             <label
-              class="flex flex-col items-center justify-center border-2 border-dashed border-green-300 rounded-xl p-8 cursor-pointer hover:bg-green-50 transition-colors group">
-              <i data-lucide="upload-cloud" class="w-10 h-10 text-green-400 group-hover:text-green-500 mb-2"></i>
+              class="flex flex-col items-center justify-center border-2 border-dashed border-green-300 rounded-xl p-4 cursor-pointer hover:bg-green-50 transition-colors group">
+              <i data-lucide="upload-cloud" class="w-8 h-8 text-green-400 group-hover:text-green-500 mb-2"></i>
               <span class="text-sm font-semibold text-green-700">Clique para enviar arquivo .ZIP processado</span>
               <input type="file" id="zip-upload" class="hidden" accept=".zip">
             </label>
@@ -214,7 +208,7 @@
                 <label class="text-xs font-black text-slate-400 uppercase tracking-widest block">1. Arquivo da
                   Prova (PDF)</label>
                 <label
-                  class="flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-xl p-6 cursor-pointer hover:border-green-400 hover:bg-slate-50 transition-all group min-h-[140px]"
+                  class="flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-xl p-6 cursor-pointer hover:border-green-400 hover:bg-slate-50 transition-all group min-h-[120px]"
                   id="exam-label">
                   <i data-lucide="file-up" class="w-8 h-8 text-slate-300 group-hover:text-green-500 mb-2"></i>
                   <span class="text-xs font-bold text-slate-500 group-hover:text-slate-700 text-center"
@@ -226,7 +220,7 @@
                 <label class="text-xs font-black text-slate-400 uppercase tracking-widest block">2. Gabarito
                   (PDF)</label>
                 <label
-                  class="flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-xl p-6 cursor-pointer hover:border-green-400 hover:bg-slate-50 transition-all group min-h-[140px]"
+                  class="flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-xl p-6 cursor-pointer hover:border-green-400 hover:bg-slate-50 transition-all group min-h-[120px]"
                   id="key-label">
                   <i data-lucide="check-circle" class="w-8 h-8 text-slate-300 group-hover:text-green-500 mb-2"></i>
                   <span class="text-xs font-bold text-slate-500 group-hover:text-slate-700 text-center"

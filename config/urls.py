@@ -8,10 +8,12 @@ from django_rest_passwordreset.views import ResetPasswordRequestToken, ResetPass
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from parser.views import landing
 from django_rest_passwordreset.models import ResetPasswordToken
+from django.contrib.auth.models import Group
 
-# --- Remover ResetPasswordToken do djangoAdmin
+# --- Remover "ResetPasswordToken" e "Group" do djangoAdmin
 try:
     admin.site.unregister(ResetPasswordToken)
+    admin.site.unregister(Group) 
 except admin.sites.NotRegistered:
     pass
 
