@@ -74,10 +74,17 @@ REGRAS CRÍTICAS DE EXTRAÇÃO:
 3. QUESTÕES:
    - 'number': Número da questão.
    - 'subject': Matéria detectada ("portugues" ou "matematica").
-   - 'text': O enunciado completo e fiel.
+   - 'text': Copie literalmente o enunciado completo.
    - 'local_attachments': Liste os IDs dos anexos globais (ex: ["Texto-1", "Figura-2"]) vinculados à questão.
    - 'alternatives': Extraia todas as opções (A a D) fielmente.
    - 'correct_answer': A letra correta (A, B, C ou D).
+   ATENÇÃO AO ENUNCIADO:
+   - O campo 'text' DEVE conter TODO o enunciado da questão.
+   - O enunciado pode estar dividido em múltiplos blocos de texto separados por imagens, tabelas, gráficos ou outros elementos visuais.
+   - NUNCA considere que uma imagem encerra o enunciado.
+   - Caso exista texto antes e depois de uma imagem, una ambos no campo 'text', preservando a ordem original da prova.
+   - Não omita frases introdutórias, comandos, trechos finais ou qualquer parte do enunciado.
+   - O campo 'text' deve representar exatamente tudo que o candidato precisa ler para responder à questão.
 4. Deve-se extrair todas as 30 questões! 
 ESQUEMA JSON ESPERADO: 
 {
@@ -115,6 +122,13 @@ REQUISITO DE ARQUIVOS:
 - No processamento final (pelo sistema), o campo 'image_data' será substituído por um campo 'path' apontando para 'images/ID.jpg'.
 - Portanto, garanta que cada imagem essencial tenha um ID único e descritivo. 
 Retorne APENAS o JSON puro, sem markdown (sem ```json), sem explicações adicionais.
+
+VALIDAÇÃO FINAL (OBRIGATÓRIA)
+Antes de retornar o JSON, revise cada uma das 30 questões.
+Confirme que:
+- nenhum trecho do enunciado foi omitido;
+- textos antes e depois de imagens foram unidos;
+- todos os comandos da questão foram preservados;
 """
 
 def _call_openrouter(prompt: str, pages: list[PageData], api_key: str) -> str:
@@ -159,7 +173,7 @@ def _call_openrouter(prompt: str, pages: list[PageData], api_key: str) -> str:
 
 def transform_exam_to_json(pages: list[PageData], answer_key_text: Optional[str], api_key: str) -> dict:
     full_text = "\n\n".join(f"--- PÁGINA {i + 1} ---\n{p.text}" for i, p in enumerate(pages))
-    prompt_text = _PROMPT + f"\n\nGABARITO: {answer_key_text if answer_key_text else 'Não fornecido'}\n\nCONTEÚDO:\n{full_text}"
+    prompt_text = _PROMPT + f"\n\nGABARITO: {answer_key_text if answer_key_text else 'Não fornecido'}\n\nCONTEÚDO EXTRAÍDO DO PDF (USE EM CONJUNTO COM AS IMAGENS DAS PÁGINAS):\n{full_text}"
     
     raw_text = _call_openrouter(prompt_text, pages, api_key)
     clean_json = re.sub(r'```json\s*|\s*```', '', raw_text).strip()
