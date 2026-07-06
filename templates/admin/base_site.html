@@ -16,7 +16,7 @@
 
 {% block userlinks %}
 <a href="/parser/" target="_blank" class="pre-ifma-btn">Acessar Parser</a>
-<a href="http://localhost:8000/" class="pre-ifma-btn">Ver o Site</a>
+<a href="/" class="pre-ifma-btn">Ver o Site</a>
 <a href="{% url 'admin:password_change' %}" class="pre-ifma-btn">Alterar Senha</a>
 <a href="{% url 'admin:logout' %}" class="pre-ifma-btn">Encerrar Sessão</a>
 {% include "admin/color_theme_toggle.html" %}
@@ -72,6 +72,10 @@
         margin-bottom: 6px;
         text-decoration: none !important;
         color: #fff !important;
+    }
+
+    .pre-ifma-btn:hover {
+        background: #25bb75
     }
 </style>
 {% endblock %}
